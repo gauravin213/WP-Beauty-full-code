@@ -58,6 +58,72 @@ add_action( 'admin_enqueue_scripts', 'salient_child_enqueue_styles');
 
 
 /*
+* Start:Register custom post type
+*/
+ $labels = array(
+        'name'               => _x( 'Hotels', 'post type general name' ),
+        'singular_name'      => _x( 'Hotels', 'post type singular name' ),
+        'add_new'            => _x( 'Add New', 'book' ),
+        'add_new_item'       => __( 'Add New Hotels' ),
+        'edit_item'          => __( 'Edit Hotels' ),
+        'new_item'           => __( 'New Hotels Items' ),
+        'all_items'          => __( 'All Hotels\'s' ),
+        'view_item'          => __( 'View Hotels' ),
+        'search_items'       => __( 'Search Hotels' ),
+        'not_found'          => __( 'No Hotels Items found' ),
+        'not_found_in_trash' => __( 'No Hotels Items found in the Trash' ),
+        'parent_item_colon'  => '',
+        'menu_name'          => 'Hotels'
+    );
+    $args = array(
+        'labels'        => $labels,
+        'description'   => 'Holds Hotels specific data',
+        'public'        => true,
+        'show_ui'       => true,
+        'show_in_menu'  => true,
+        'query_var'     => true,
+        'show_in_nav_menus'   => true,
+        'show_in_admin_bar'   => true,
+        'rewrite'       => array('slug' => 'hotels'),
+        'capability_type'=> 'post',
+        'has_archive'   => true,
+        'hierarchical'  => false,
+        'menu_position' => 5,
+        'supports'            => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'revisions', 'custom-fields'),
+        'menu_icon' => 'dashicons-welcome-write-blog'
+    );
+
+    register_post_type( 'hotels', $args );
+
+  
+    // Add new taxonomy travel_guide_cat
+    $labels = array(
+        'name'              => _x( 'Hotels Categories', 'taxonomy general name' ),
+        'singular_name'     => _x( 'Hotels Category', 'taxonomy singular name' ),
+        'search_items'      =>  __( 'Search Hotels Categories' ),
+        'all_items'         => __( 'All Hotels Category' ),
+        'parent_item'       => __( 'Parent Hotels Category' ),
+        'parent_item_colon' => __( 'Parent Hotels Category:' ),
+        'edit_item'         => __( 'Edit Hotels Category' ),
+        'update_item'       => __( 'Update Hotels Category' ),
+        'add_new_item'      => __( 'Add New Hotels Category' ),
+        'new_item_name'     => __( 'New Hotels Category Name' ),
+        'menu_name'         => __( 'Hotels Categories' ),
+    );
+
+    register_taxonomy('hotels_cat',array('hotels'), array(
+        'hierarchical' => true,
+        'labels'       => $labels,
+        'show_ui'      => true,
+        'query_var'    => true,
+        'rewrite'      => array( 'slug' => 'hotels-cat' ),
+    ));
+/*
+* End:Register custom post type
+*/
+
+
+/*
 * Start:after_setup_theme
 */
 function wetime_theme_setup(){
