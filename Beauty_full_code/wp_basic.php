@@ -600,6 +600,7 @@ $args = array(
     'offset'           => 0,
     'category'         => $kategory,
     'category_name'    => '',
+    'category__in'     => array(),
     'orderby'          => 'date',
     'order'            => 'DESC',
     'include'          => '',
@@ -624,6 +625,15 @@ $args = array(
             'value'     => '1',
             'compare'   => 'LIKE',
         ),
+    ),
+    'tax_query' => array(
+        'relation' => 'AND',
+        array(
+            'taxonomy' => 'hotels_cat',
+            'field'    => 'term_id',
+            'terms'    => $category,
+            'operator' => 'IN'
+        )
     ),
     'date_query'     => array( 'after' => $search_date ),
 );
