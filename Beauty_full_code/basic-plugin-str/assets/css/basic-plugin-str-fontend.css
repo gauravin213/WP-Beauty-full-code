@@ -1,0 +1,29 @@
+
+/*
+* cuspricecal-frontend style
+*/
+div#cuspricecal-body {
+    font-weight: 700;
+}
+span#cuspricecal_total {
+    color: green;
+}
+span#cuspricecal_price_per_price {
+    color: #ce4444;
+}
+input#cuspricecal_qty {
+    width: 100%;
+}
+
+.chosen-select {
+	width: 350px;
+}
+
+div#cuspricecal-body2 {
+    color: #e21616;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px;
+    border: 1px solid;
+    margin-top: 5px;
+}
