@@ -219,6 +219,10 @@ function psp_add_role_caps() {
 
 function add_role_filter_to_posts_query( $query ) {
 
+  if (isset($_GET['post_type'])) {
+
+  }
+
     $user_id = get_current_user_id(); 
     $user_meta = get_userdata($user_id);
     $user_roles = $user_meta->roles;
