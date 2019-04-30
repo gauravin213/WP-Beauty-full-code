@@ -103,7 +103,7 @@ class basicpluginstr
         $data[] = array(
                 'name'  => 'Name',
                 'value' => 'valus',
-                'price' => 50
+                'price' => 200
                 );
                 
         $cart_item_data['basicpluginstr'] = array_merge( $cart_item_data['basicpluginstr'], $data);
@@ -141,9 +141,16 @@ class basicpluginstr
 
     function get_cart_item_from_session($cart_item, $values) {
 
-        if ( ! empty( $values['basicpluginstr'] ) ) {
+       /* if ( ! empty( $values['basicpluginstr'] ) ) {
             $cart_item['basicpluginstr'] = $values['basicpluginstr'];
             $cart_item = $this->add_cart_item( $cart_item );
+        }
+        return $cart_item;*/
+
+
+        $cart_item = $this->add_cart_item($cart_item);
+        if (!empty($cart_item)) {
+            return $cart_item;
         }
         return $cart_item;
 
@@ -159,7 +166,7 @@ class basicpluginstr
                 $value = $basicpluginstr['value'];
                 woocommerce_add_order_item_meta( $item_id, $name, $value );
 
-                //woocommerce_add_order_item_meta( $item_id, 'basicpluginstr', 'basicpluginstr value' );
+                woocommerce_add_order_item_meta( $item_id, 'basicpluginstr', 'basicpluginstr value' );
             }
         }
 
@@ -169,6 +176,30 @@ class basicpluginstr
 new basicpluginstr();
 
 }
+
+
+
+/*add_action('woocommerce_checkout_update_order_meta', 'custom_checkout_field_update_order_meta');
+function custom_checkout_field_update_order_meta($order_id){
+
+  update_post_meta($order_id, '_consultant_code', $get_session_update_order_meta);
+    
+}
+
+
+add_action( 'woocommerce_add_order_item_meta',  'cus_woocommerce_add_order_item_meta' , 10, 2 );
+
+function cus_woocommerce_add_order_item_meta( $item_id, $values ) {
+ 
+    if ( ! empty( $values['cuspricecal'] ) ) {
+    foreach ( $values['cuspricecal'] as $cuspricecal ) {
+
+      $name = $cuspricecal['name'];
+      woocommerce_add_order_item_meta( $item_id, $name, $cuspricecal['value'] );
+    }
+  }
+
+}*/
 
 
 
