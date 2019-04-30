@@ -1,5 +1,10 @@
 <?php
 
+// woocommerce addon
+// js composer addon
+// contact form7 addon
+// Widget 
+
 /*
 *  Start:wp_enqueue_scripts action
 */
@@ -123,6 +128,468 @@ add_action( 'admin_enqueue_scripts', 'salient_child_enqueue_styles');
 */
 
 
+
+/*
+* Start:Add custom role to access spacifice post type
+*/
+function codex_municipality_init() {
+    $labels = array(
+        'name'               => _x( 'Municipalities', 'post type general name', 'your-plugin-textdomain' ),
+        'singular_name'      => _x( 'Municipality', 'post type singular name', 'your-plugin-textdomain' ),
+        'menu_name'          => _x( 'Municipalities', 'admin menu', 'your-plugin-textdomain' ),
+        'name_admin_bar'     => _x( 'Municipality', 'add new on admin bar', 'your-plugin-textdomain' ),
+        'add_new'            => _x( 'Add New', 'municipality', 'your-plugin-textdomain' ),
+        'add_new_item'       => __( 'Add New Municipality', 'your-plugin-textdomain' ),
+        'new_item'           => __( 'New Municipality', 'your-plugin-textdomain' ),
+        'edit_item'          => __( 'Edit Municipality', 'your-plugin-textdomain' ),
+        'view_item'          => __( 'View Municipality', 'your-plugin-textdomain' ),
+        'all_items'          => __( 'All Municipalities', 'your-plugin-textdomain' ),
+        'search_items'       => __( 'Search Municipalities', 'your-plugin-textdomain' ),
+        'parent_item_colon'  => __( 'Parent Municipalities:', 'your-plugin-textdomain' ),
+        'not_found'          => __( 'No municipalities found.', 'your-plugin-textdomain' ),
+        'not_found_in_trash' => __( 'No municipalities found in Trash.', 'your-plugin-textdomain' )
+    );
+
+    $args = array(
+        'labels'             => $labels,
+        'description'        => __( 'Description.', 'your-plugin-textdomain' ),
+        'public'             => true,
+        'publicly_queryable' => true,
+        'show_ui'            => true,
+        'show_in_menu'       => true,
+        'query_var'          => true,
+        'rewrite'            => array( 'slug' => 'municipality' ),
+        //'capability_type'    => 'post',
+        'capability_type'     => array('psp_project','psp_projects'),
+        'map_meta_cap'        => true,
+        'has_archive'        => true,
+        'hierarchical'       => false,
+        'menu_position'      => null,
+        'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' )
+    );
+
+    register_post_type( 'municipality', $args );         remove_menu_page( 'edit.php?post_type=cron_job' ); 
+}
+
+
+remove_role("psp_project_manager");
+
+add_action('admin_init', 'allow_new_role_uploads');
+function allow_new_role_uploads() {
+
+    add_role('muncipality_user',
+        'Muncipality User',
+        array(
+            'read' => true,
+            'edit_posts' => false,
+            'delete_posts' => false,
+            'publish_posts' => false,
+            'upload_files' => true,
+        )
+    );
+}
+
+add_action('admin_init','psp_add_role_caps',999);
+function psp_add_role_caps() {
+
+    // Add the roles you'd like to administer the custom post types
+    $roles = array('muncipality_user');
+
+    // Loop through each role and assign capabilities
+    foreach($roles as $the_role) { 
+
+         $role = get_role($the_role);
+        
+             $role->add_cap( 'read' );
+             $role->add_cap( 'read_psp_project');
+             $role->add_cap( 'read_private_psp_projects' );
+             $role->add_cap( 'edit_psp_project' );
+             $role->add_cap( 'edit_psp_projects' );
+             $role->add_cap( 'edit_others_psp_projects' );
+             $role->add_cap( 'edit_published_psp_projects' );
+             $role->add_cap( 'publish_psp_projects' );
+             $role->add_cap( 'delete_others_psp_projects' );
+             $role->add_cap( 'delete_private_psp_projects' );
+             $role->add_cap( 'delete_published_psp_projects' );
+
+    }
+
+
+}
+
+function add_role_filter_to_posts_query( $query ) {
+
+    $user_id = get_current_user_id(); 
+    $user_meta = get_userdata($user_id);
+    $user_roles = $user_meta->roles;
+
+    if ( in_array( 'muncipality_user', $user_roles, true ) ) {
+       /* echo "<pre>";
+        print_r($user_roles);
+        echo "</pre>";*/
+        $query->set( 'author__in', $user_id );
+    }
+}
+add_action( 'pre_get_posts', 'add_role_filter_to_posts_query' );
+/*
+* End:Add custom role to access spacifice post type
+*/
+
+
+
+/*
+* Start:add metabox
+*/
+add_action( 'add_meta_boxes', 'custom_admin_metabox');
+function custom_admin_metabox(){
+
+    add_meta_box( string $id, string $title, callable $callback, string|array|WP_Screen $screen = null, string $context = 'advanced', string $priority = 'default', array $callback_args = null )
+
+    //context = 'normal', 'side', and 'advanced'. 
+    //priority = 'high', 'low', default
+    add_meta_box( 'call_back_function', 'Title', 'call_back_function', '{post_type}', 'normal', 'high' );
+
+}
+
+function call_back_function(){
+
+  global $post;
+
+  echo $$post->ID;
+
+  $subtitle = get_post_meta( $post->ID, 'subtitle', true ); 
+
+  ?>
+
+   <input type="text" name="subtitle" value="<?php echo $subtitle;?>">
+
+  <?php
+
+}
+
+add_action( 'save_post', 'destination_save_metabox', 1, 2 );
+function destination_save_metabox( $post_id, $post ) {
+
+    echo $post->ID;
+
+    if (isset( $_POST['subtitle'] ) ) {
+        $sanitized = wp_filter_post_kses( $_POST['subtitle'] );
+        update_post_meta( $post->ID, 'subtitle', $sanitized );
+    }
+}
+/*
+* End:add metabox
+*/
+
+
+
+
+/*
+*  Start:Add the custom fields to the "category" taxonomy, using our callback function  
+*/
+add_action( 'category_edit_form_fields', 'category_taxonomy_custom_fields', 10, 2 );  
+add_action( 'category_add_form_fields', 'category_taxonomy_custom_fields', 10, 2 );  
+// A callback function to add a custom field to our "category" taxonomy  
+function category_taxonomy_custom_fields($tag) {  
+   // Check for existing taxonomy meta for the term you're editing  
+    $t_id = $tag->term_id; // Get the ID of the term you're editing   
+?>  
+  
+<tr class="form-field">  
+  <?php 
+  //echo"___".get_term_meta($t_id, 'exlude_faq_cat', true);
+  ?>
+
+    <th scope="row" valign="top">  
+        <label for="exlude_faq_cat"><?php _e('Exlude category from faq page'); ?></label>  
+    </th>  
+    <td>  
+        <input type="checkbox" name="exlude_faq_cat" id="exlude_faq_cat"  value="Yes" <?php if (get_term_meta($t_id, 'exlude_faq_cat', true)!="") { echo 'checked="checked"';}?>> 
+    </td>  
+</tr>  
+  
+<?php  
+}  
+
+
+// Save the changes made on the "category" taxonomy, using our callback function  
+add_action( 'edited_category', 'save_taxonomy_custom_fields', 10, 2 ); // A callback function to save our extra taxonomy field(s)  
+add_action( 'create_category', 'save_taxonomy_custom_fields', 10, 2 );
+function save_taxonomy_custom_fields( $term_id ) {  
+
+  if (isset($_POST['exlude_faq_cat'])) {
+    update_term_meta($term_id, 'exlude_faq_cat', $_POST['exlude_faq_cat']);
+  }
+  else{
+    update_term_meta($term_id, 'exlude_faq_cat', '');
+  }
+    
+}  
+/*
+*  End:Add the fields to the "category" taxonomy, using our callback function  
+*/
+
+
+
+/*
+* Start:custom user meta fields
+*/
+add_action( 'show_user_profile', 'extra_user_profile_fields' );
+add_action( 'edit_user_profile', 'extra_user_profile_fields' );
+
+function extra_user_profile_fields( $user ) { ?>
+    <h3><?php _e("Extra profile information", "blank"); ?></h3>
+
+    <table class="form-table">
+    <tr>
+    <th><label for="company-vatid"><?php _e("Company Vatid"); ?></label></th>
+        <td>
+            <input type="text" name="company-vatid" id="company-vatid" value="<?php echo esc_attr( get_the_author_meta( 'company-vatid', $user->ID ) ); ?>" class="regular-text" /><br />
+            <span class="description"><?php _e("Please enter your company-vatid."); ?></span>
+        </td>
+    </tr>
+    </table>
+<?php }
+
+
+add_action( 'personal_options_update', 'save_extra_user_profile_fields' );
+add_action( 'edit_user_profile_update', 'save_extra_user_profile_fields' );
+
+function save_extra_user_profile_fields( $user_id ) {
+    if ( !current_user_can( 'edit_user', $user_id ) ) { 
+        return false; 
+    }
+    update_user_meta( $user_id, 'company-vatid', $_POST['company-vatid'] );
+}
+/*
+* End:custom user meta fields
+*/
+
+
+
+/*
+* Start:Add custom column on post grid
+*/
+add_action( 'edit_form_after_title', 'my_custom_fun' );
+function my_custom_fun($post_id){
+
+}
+
+
+//filter grid column 
+add_action( 'manage_edit-my_custom_activity_columns', 'my_custom_fun'); 
+function my_custom_edit_movie_columns($columns) { 
+    $columns = array(
+            'cb' => '<input type="checkbox" />',
+            'title' => __( 'Title' ),
+            'filetype' => __( 'File Type' ),
+            'status' => __( 'Status' ),
+            'updated_date' => __( 'Updated Date' ),
+            'date' => __( 'Date' )
+        );
+
+        return $columns;
+}
+
+
+// add custom column valuse
+add_action( 'manage_my_custom_activity_posts_custom_column', 'my_custom_fun', 10, 2); 
+function my_custom_activity_columns( $column, $post_id ) { 
+
+   switch( $column ) 
+   {
+
+        case 'filetype' :
+
+            if ( empty( $filetype ) ) echo __( 'Unknown' ); else printf( __( '%s' ), $filetype );
+
+            break;
+
+        case 'status' :
+
+             if ( empty( $filetype ) ) echo __( 'Unknown' ); else printf( __( '%s' ), $filetype );
+
+            break;
+
+        case 'updated_date' :
+
+            if ( empty( $filetype ) ) echo __( 'Unknown' ); else printf( __( '%s' ), $filetype );
+
+            break;
+
+        default :
+                break;
+    }
+
+}
+/*
+* End:Add custom column on post grid
+*/
+
+
+
+/*
+* Start:Register Custom widgets and sidebar
+*/
+function wpb_widgets_init() {
+ 
+    register_sidebar( array(
+        'name'          => 'Custom Header Widget Area',
+        'id'            => 'custom-header-widget',
+        'before_widget' => '<div class="chw-widget">',
+        'after_widget'  => '</div>',
+        'before_title'  => '<h2 class="chw-title">',
+        'after_title'   => '</h2>',
+    ) );
+
+
+    register_sidebar( array(
+        'name' => __('Blog Sidebar One','wetime'),
+        'id' => 'blog1'
+    ) );
+ 
+}
+add_action( 'widgets_init', 'wpb_widgets_init' );
+
+
+if ( is_active_sidebar( 'custom-header-widget' ) ) {
+
+    ?>
+    <div id="header-widget-area" class="chw-widget-area widget-area" role="complementary">
+    <?php dynamic_sidebar( 'custom-header-widget' ); ?>
+    </div>
+    <?php
+
+}
+
+
+
+
+function wpiw_widget() {
+  register_widget( 'null_custom_menu_widget' );
+}
+add_action( 'widgets_init', 'wpiw_widget' );
+
+Class null_custom_menu_widget extends WP_Widget {
+
+  function __construct() {
+    parent::__construct(
+      'null-custom-menu',__( 'Custom menu', 'wp-Custom menu-widget' ),
+      array(
+        'classname' => 'null-custom-menu',
+        'description' => esc_html__( 'Displays custom menus', 'wp-Custom menu-widget' ),
+        'customize_selective_refresh' => true,
+      )
+    );
+  }
+
+  function widget( $args, $instance ) {
+
+    $title = empty( $instance['title'] ) ? '' : apply_filters( 'widget_title', $instance['title'] );
+  
+    $target = empty( $instance['target'] ) ? '_self' : $instance['target'];
+    
+    echo $args['before_widget'];
+
+    if ( ! empty( $title ) ) { echo $args['before_title'] . wp_kses_post( $title ) . $args['after_title']; };
+
+    do_action( 'wpiw_before_widget', $instance );
+
+    /**************/
+    echo "==>".$title; echo "<br>";
+    echo "==>".$target;
+    /**************/
+
+    do_action( 'wpiw_after_widget', $instance );
+
+    echo $args['after_widget'];
+  }
+
+  function form( $instance ) {
+    $instance = wp_parse_args( (array) $instance, array(
+      'title' => __( 'Custom menu', 'wp-Custom menu-widget' ),
+      'target' => '_self',
+    ) );
+    $title = $instance['title'];
+    $target = $instance['target'];
+    ?>
+    <p>
+      <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>">
+        <?php esc_html_e( 'Title', 'wp-Custom menu-widget' ); ?>: 
+        <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
+      </label>
+    </p>
+
+    <p>
+      <label for="<?php echo esc_attr( $this->get_field_id( 'target' ) ); ?>"><?php esc_html_e( 'Select menu', 'wp-Custom menu-widget' ); ?>:
+      </label>
+
+      <select id="<?php echo esc_attr( $this->get_field_id( 'target' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'target' ) ); ?>" class="widefat">
+
+        <option value="regions_menu" <?php selected( 'regions_menu', $target ); ?>>
+          <?php esc_html_e( 'regions_menu', 'wp-Custom menu-widget' ); ?>
+        </option>
+
+        <option value="popular_destinations_menu" <?php selected( 'popular_destinations_menu', $target ); ?>>
+          <?php esc_html_e( 'popular_destinations_menu', 'wp-Custom menu-widget' ); ?>
+        </option>
+
+        <option value="interest_types_menu" <?php selected( 'interest_types_menu', $target ); ?>>
+          <?php esc_html_e( 'interest_types_menu', 'wp-Custom menu-widget' ); ?>
+        </option>
+
+        <option value="safari_holidays_menu" <?php selected( 'safari_holidays_menu', $target ); ?>>
+          <?php esc_html_e( 'safari_holidays_menu', 'wp-Custom menu-widget' ); ?>
+        </option>
+
+        <option value="ideas_by_month_menu" <?php selected( 'ideas_by_month_menu', $target ); ?>>
+          <?php esc_html_e( 'ideas_by_month_menu', 'wp-Custom menu-widget' ); ?>
+        </option>
+
+        <option value="other_inspiration_menu" <?php selected( 'other_inspiration_menu', $target ); ?>>
+          <?php esc_html_e( 'other_inspiration_menu', 'wp-Custom menu-widget' ); ?>
+        </option>
+
+      </select>
+    </p>
+
+    <?php
+
+  }
+
+  function update( $new_instance, $old_instance ) {
+    $instance = $old_instance;
+    $instance['title'] = strip_tags( $new_instance['title'] );
+  
+    $instance['target'] = $new_instance['target'];
+
+    return $instance;
+  }
+
+}
+
+/*
+* End:Register Custom widgets and sidebar
+*/
+
+
+/*
+* Start:add shortcode
+*/
+function acf_gallery_function(){
+ob_start();
+
+
+return ob_get_clean();
+}
+add_shortcode('acf_gallery_shortcode', 'acf_gallery_function');
+/*
+* End:add shortcode
+*/
+
+
+
+
 /*
 * Start:after_setup_theme
 */
@@ -141,6 +608,7 @@ add_action( 'after_setup_theme', 'wetime_theme_setup' );
 /*
 * End:after_setup_theme
 */
+
 
 
 /*
@@ -415,249 +883,6 @@ add_action( 'admin_enqueue_scripts', 'rr_scripts' );
 
 
 
-
-
-
-
-/*
-* Start:add metabox
-*/
-add_action( 'add_meta_boxes', 'custom_admin_metabox');
-function custom_admin_metabox(){
-
-    add_meta_box( string $id, string $title, callable $callback, string|array|WP_Screen $screen = null, string $context = 'advanced', string $priority = 'default', array $callback_args = null )
-
-    //context = 'normal', 'side', and 'advanced'. 
-    //priority = 'high', 'low', default
-    add_meta_box( 'call_back_function', 'Title', 'call_back_function', '{post_type}', 'normal', 'high' );
-
-}
-
-function call_back_function(){
-
-  global $post;
-
-  echo $$post->ID;
-
-  $subtitle = get_post_meta( $post->ID, 'subtitle', true ); 
-
-  ?>
-
-   <input type="text" name="subtitle" value="<?php echo $subtitle;?>">
-
-  <?php
-
-}
-
-add_action( 'save_post', 'destination_save_metabox', 1, 2 );
-function destination_save_metabox( $post_id, $post ) {
-
-    echo $post->ID;
-}
-/*
-* End:add metabox
-*/
-
-
-/*
-*  Start:Add the fields to the "category" taxonomy, using our callback function  
-*/
-add_action( 'category_edit_form_fields', 'category_taxonomy_custom_fields', 10, 2 );  
-add_action( 'category_add_form_fields', 'category_taxonomy_custom_fields', 10, 2 );  
-// A callback function to add a custom field to our "category" taxonomy  
-function category_taxonomy_custom_fields($tag) {  
-   // Check for existing taxonomy meta for the term you're editing  
-    $t_id = $tag->term_id; // Get the ID of the term you're editing   
-?>  
-  
-<tr class="form-field">  
-  <?php 
-  //echo"___".get_term_meta($t_id, 'exlude_faq_cat', true);
-  ?>
-
-    <th scope="row" valign="top">  
-        <label for="exlude_faq_cat"><?php _e('Exlude category from faq page'); ?></label>  
-    </th>  
-    <td>  
-        <input type="checkbox" name="exlude_faq_cat" id="exlude_faq_cat"  value="Yes" <?php if (get_term_meta($t_id, 'exlude_faq_cat', true)!="") { echo 'checked="checked"';}?>> 
-    </td>  
-</tr>  
-  
-<?php  
-}  
-
-
-// Save the changes made on the "category" taxonomy, using our callback function  
-add_action( 'edited_category', 'save_taxonomy_custom_fields', 10, 2 ); // A callback function to save our extra taxonomy field(s)  
-add_action( 'create_category', 'save_taxonomy_custom_fields', 10, 2 );
-function save_taxonomy_custom_fields( $term_id ) {  
-
-  if (isset($_POST['exlude_faq_cat'])) {
-    update_term_meta($term_id, 'exlude_faq_cat', $_POST['exlude_faq_cat']);
-  }
-  else{
-    update_term_meta($term_id, 'exlude_faq_cat', '');
-  }
-    
-}  
-/*
-*  End:Add the fields to the "category" taxonomy, using our callback function  
-*/
-
-
-
-/*
-* Start:custom user meta fields
-*/
-add_action( 'show_user_profile', 'extra_user_profile_fields' );
-add_action( 'edit_user_profile', 'extra_user_profile_fields' );
-
-function extra_user_profile_fields( $user ) { ?>
-    <h3><?php _e("Extra profile information", "blank"); ?></h3>
-
-    <table class="form-table">
-    <tr>
-    <th><label for="company-vatid"><?php _e("Company Vatid"); ?></label></th>
-        <td>
-            <input type="text" name="company-vatid" id="company-vatid" value="<?php echo esc_attr( get_the_author_meta( 'company-vatid', $user->ID ) ); ?>" class="regular-text" /><br />
-            <span class="description"><?php _e("Please enter your company-vatid."); ?></span>
-        </td>
-    </tr>
-    </table>
-<?php }
-
-
-add_action( 'personal_options_update', 'save_extra_user_profile_fields' );
-add_action( 'edit_user_profile_update', 'save_extra_user_profile_fields' );
-
-function save_extra_user_profile_fields( $user_id ) {
-    if ( !current_user_can( 'edit_user', $user_id ) ) { 
-        return false; 
-    }
-    update_user_meta( $user_id, 'company-vatid', $_POST['company-vatid'] );
-}
-/*
-* End:custom user meta fields
-*/
-
-
-
-/*
-* Start:Add custom column on post grid
-*/
-add_action( 'edit_form_after_title', 'my_custom_fun' );
-function my_custom_fun($post_id){
-
-}
-
-
-//filter grid column 
-add_action( 'manage_edit-my_custom_activity_columns', 'my_custom_fun'); 
-function my_custom_edit_movie_columns($columns) { 
-    $columns = array(
-            'cb' => '<input type="checkbox" />',
-            'title' => __( 'Title' ),
-            'filetype' => __( 'File Type' ),
-            'status' => __( 'Status' ),
-            'updated_date' => __( 'Updated Date' ),
-            'date' => __( 'Date' )
-        );
-
-        return $columns;
-}
-
-
-// add custom column valuse
-add_action( 'manage_my_custom_activity_posts_custom_column', 'my_custom_fun', 10, 2); 
-function my_custom_activity_columns( $column, $post_id ) { 
-
-   switch( $column ) 
-   {
-
-        case 'filetype' :
-
-            if ( empty( $filetype ) ) echo __( 'Unknown' ); else printf( __( '%s' ), $filetype );
-
-            break;
-
-        case 'status' :
-
-             if ( empty( $filetype ) ) echo __( 'Unknown' ); else printf( __( '%s' ), $filetype );
-
-            break;
-
-        case 'updated_date' :
-
-            if ( empty( $filetype ) ) echo __( 'Unknown' ); else printf( __( '%s' ), $filetype );
-
-            break;
-
-        default :
-                break;
-    }
-
-}
-/*
-* End:Add custom column on post grid
-*/
-
-
-
-/*
-* Start:Register Custom widgets 12.jun.2018
-*/
-function wpb_widgets_init() {
- 
-    register_sidebar( array(
-        'name'          => 'Custom Header Widget Area',
-        'id'            => 'custom-header-widget',
-        'before_widget' => '<div class="chw-widget">',
-        'after_widget'  => '</div>',
-        'before_title'  => '<h2 class="chw-title">',
-        'after_title'   => '</h2>',
-    ) );
-
-
-    register_sidebar( array(
-        'name' => __('Blog Sidebar One','wetime'),
-        'id' => 'blog1'
-    ) );
- 
-}
-add_action( 'widgets_init', 'wpb_widgets_init' );
-
-
-if ( is_active_sidebar( 'custom-header-widget' ) ) {
-
-    ?>
-    <div id="header-widget-area" class="chw-widget-area widget-area" role="complementary">
-    <?php dynamic_sidebar( 'custom-header-widget' ); ?>
-    </div>
-    <?php
-
-}
-
-/*
-* End:Register Custom widgets 12.jun.2018
-*/
-
-
-/*
-* Start:add shortcode
-*/
-function acf_gallery_function(){
-ob_start();
-
-
-return ob_get_clean();
-}
-add_shortcode('acf_gallery_shortcode', 'acf_gallery_function');
-/*
-* End:add shortcode
-*/
-
-
-
 /* 
 * Start:Post argument
 */
@@ -667,6 +892,7 @@ $args = array(
     'category'         => $kategory,
     'category_name'    => '',
     'category__in'     => array(),
+    'post__in'         => array(),
     'orderby'          => 'date',
     'order'            => 'DESC',
     'include'          => '',
@@ -742,134 +968,7 @@ add_filter( 'register_post_type_args', 'wp1482371_custom_post_type_args', 20, 2 
 
 
 
-/*
-* Start:pre_get_posts wp query filter
-*/
-function add_role_filter_to_posts_query( $query ) {
 
-    $user_id = get_current_user_id(); 
-    $user_meta = get_userdata($user_id);
-    $user_roles = $user_meta->roles;
-
-    if ( in_array( 'muncipality_user', $user_roles, true ) ) {
-       /* echo "<pre>";
-        print_r($user_roles);
-        echo "</pre>";*/
-        $query->set( 'author__in', $user_id );
-    }
-}
-add_action( 'pre_get_posts', 'add_role_filter_to_posts_query' );
-/*
-* Start:pre_get_posts wp query filter
-*/
-
-
-
-/*
-* Start:Add custom role to access spacifice post type
-*/
-function codex_municipality_init() {
-    $labels = array(
-        'name'               => _x( 'Municipalities', 'post type general name', 'your-plugin-textdomain' ),
-        'singular_name'      => _x( 'Municipality', 'post type singular name', 'your-plugin-textdomain' ),
-        'menu_name'          => _x( 'Municipalities', 'admin menu', 'your-plugin-textdomain' ),
-        'name_admin_bar'     => _x( 'Municipality', 'add new on admin bar', 'your-plugin-textdomain' ),
-        'add_new'            => _x( 'Add New', 'municipality', 'your-plugin-textdomain' ),
-        'add_new_item'       => __( 'Add New Municipality', 'your-plugin-textdomain' ),
-        'new_item'           => __( 'New Municipality', 'your-plugin-textdomain' ),
-        'edit_item'          => __( 'Edit Municipality', 'your-plugin-textdomain' ),
-        'view_item'          => __( 'View Municipality', 'your-plugin-textdomain' ),
-        'all_items'          => __( 'All Municipalities', 'your-plugin-textdomain' ),
-        'search_items'       => __( 'Search Municipalities', 'your-plugin-textdomain' ),
-        'parent_item_colon'  => __( 'Parent Municipalities:', 'your-plugin-textdomain' ),
-        'not_found'          => __( 'No municipalities found.', 'your-plugin-textdomain' ),
-        'not_found_in_trash' => __( 'No municipalities found in Trash.', 'your-plugin-textdomain' )
-    );
-
-    $args = array(
-        'labels'             => $labels,
-        'description'        => __( 'Description.', 'your-plugin-textdomain' ),
-        'public'             => true,
-        'publicly_queryable' => true,
-        'show_ui'            => true,
-        'show_in_menu'       => true,
-        'query_var'          => true,
-        'rewrite'            => array( 'slug' => 'municipality' ),
-        //'capability_type'    => 'post',
-        'capability_type'     => array('psp_project','psp_projects'),
-        'map_meta_cap'        => true,
-        'has_archive'        => true,
-        'hierarchical'       => false,
-        'menu_position'      => null,
-        'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' )
-    );
-
-    register_post_type( 'municipality', $args );         remove_menu_page( 'edit.php?post_type=cron_job' ); 
-}
-
-
-remove_role("psp_project_manager");
-
-add_action('admin_init', 'allow_new_role_uploads');
-function allow_new_role_uploads() {
-
-    add_role('muncipality_user',
-        'Muncipality User',
-        array(
-            'read' => true,
-            'edit_posts' => false,
-            'delete_posts' => false,
-            'publish_posts' => false,
-            'upload_files' => true,
-        )
-    );
-}
-
-add_action('admin_init','psp_add_role_caps',999);
-function psp_add_role_caps() {
-
-    // Add the roles you'd like to administer the custom post types
-    $roles = array('muncipality_user');
-
-    // Loop through each role and assign capabilities
-    foreach($roles as $the_role) { 
-
-         $role = get_role($the_role);
-        
-             $role->add_cap( 'read' );
-             $role->add_cap( 'read_psp_project');
-             $role->add_cap( 'read_private_psp_projects' );
-             $role->add_cap( 'edit_psp_project' );
-             $role->add_cap( 'edit_psp_projects' );
-             $role->add_cap( 'edit_others_psp_projects' );
-             $role->add_cap( 'edit_published_psp_projects' );
-             $role->add_cap( 'publish_psp_projects' );
-             $role->add_cap( 'delete_others_psp_projects' );
-             $role->add_cap( 'delete_private_psp_projects' );
-             $role->add_cap( 'delete_published_psp_projects' );
-
-    }
-
-
-}
-
-function add_role_filter_to_posts_query( $query ) {
-
-    $user_id = get_current_user_id(); 
-    $user_meta = get_userdata($user_id);
-    $user_roles = $user_meta->roles;
-
-    if ( in_array( 'muncipality_user', $user_roles, true ) ) {
-       /* echo "<pre>";
-        print_r($user_roles);
-        echo "</pre>";*/
-        $query->set( 'author__in', $user_id );
-    }
-}
-add_action( 'pre_get_posts', 'add_role_filter_to_posts_query' );
-/*
-* End:Add custom role to access spacifice post type
-*/
 
 
 /*
@@ -900,16 +999,6 @@ add_shortcode('wpb_childpages', 'wpb_list_child_pages');
 /*
 * End:Get child pages link
 */
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1131,16 +1220,6 @@ add_shortcode( 'get_upcoming_events_list', 'upcoming_events' );
 
 
 
-
-
-
-
-
-
-
-
-
-
 /*
 * get post category by post id 
 * Return textonomi detaisl + categoty details like category count, description etc..
@@ -1226,6 +1305,28 @@ if (file_put_contents($outputFile, 'jjjjjjjjjjjjjjjjjjjjjj') === false)
 
 
 
+/*
+* Start:Get month list from April to March
+*/
+$months = array();
+for ($i = 0; $i < 12; $i++) {
+$timestamp = mktime(0, 0, 0, date('n') + $i, 1);
+$months[date('n', $timestamp)] = date("M 'y", $timestamp);
+}
+
+echo "<pre>";
+print_r($months);
+echo "</pre>";
+
+
+for ($m=1; $m<=12; $m++) {
+   $month = date('F', mktime(0,0,0,$m));
+   echo $month. '<br>';
+}
+/*
+* End:Get month list from April to March
+*/
+
 
 
 
@@ -1277,6 +1378,10 @@ function my_custom_fun($post_id){
 
 }
 
+
+/*
+* Cusrom hooks
+*/
 do_action('wporg_after_settings_page_html');
 add_action('wporg_after_settings_page_html', 'custom_fun');
 function custom_fun(){
@@ -1296,7 +1401,9 @@ function custom_fun_two($data){
     return $data;
 }
 
-
+/*
+* Cusrom hooks
+*/
 
 echo get_permalink($postId); 
 
