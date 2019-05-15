@@ -149,7 +149,6 @@ function adding_custom_price( $cart_obj ) {
 /*
 * add to cart programatically woocommerce
 */
-
 $product_id   = $_POST['product_id'];
   $quantity     = $_POST['quantity'];
   $variation_id = $_POST['variation_id'];
@@ -159,6 +158,13 @@ $product_id   = $_POST['product_id'];
   );
 
 WC()->cart->add_to_cart( $product_id, $quantity);
+
+$string|bool = WC_Cart::add_to_cart( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
+
+
+$cartId = WC()->cart->generate_cart_id( $product_id );
+      $cartItemKey = WC()->cart->find_product_in_cart( $cartId );
+      WC()->cart->remove_cart_item( $cartItemKey );
 /*
 * add to cart programatically woocommerce
 */
@@ -262,3 +268,206 @@ function wpa83367_price_html( $price, $product ){
 * @modify price html
 */
 ?>
+
+
+
+
+<!--checkout page-->
+<?php if (is_checkout()) { ?>
+<script type="text/javascript">
+    jQuery(document).ready(function(){ //alert('check');
+
+        //Open model on state selection
+        jQuery(document).on('change', '#billing_state', function(){
+
+            var target = jQuery(this);
+
+            var cus_state = target.find(":selected").val();
+
+            if (cus_state == "CA") { //fire popup box
+
+                //alert(cus_state+' Open popup');
+
+                //jQuery('#myModal').modal('toggle');
+                //jQuery('#myModal').modal('show');
+                //jQuery('#myModal').modal('hide');
+
+                jQuery('#myModal').modal({backdrop: 'static', keyboard: false}) 
+
+            }
+        });
+
+        jQuery(document).on('change', '#shipping_state', function(){
+
+            var target = jQuery(this);
+
+            var cus_state = target.find(":selected").val();
+
+            if (cus_state == "CA") { //fire popup box
+
+                //alert(cus_state+' Open popup');
+
+                //jQuery('#myModal').modal('toggle');
+                //jQuery('#myModal').modal('show');
+                //jQuery('#myModal').modal('hide');
+
+                jQuery('#myModal').modal({backdrop: 'static', keyboard: false}) 
+
+            }
+        });
+
+        jQuery(document).on('click', '#custom_term_go', function(){
+
+            if(jQuery('#custom_term_checkbox').is(":checked")){
+                //alert("Checkbox is checked.");
+                jQuery('#myModal').modal('hide');
+            }else{
+                alert("Please check this to accept California 65 rules");
+            }
+        });
+
+        var checkout_form = jQuery( 'form.checkout' );
+
+        checkout_form.on( 'checkout_place_order', function() { //alert("ppp"); 
+
+            var cus_state = jQuery('#billing_state').find(":selected").val();
+
+            if (cus_state == "CA") { //alert(cus_state);  //fire popup box
+
+                if(jQuery('#custom_term_checkbox').is(":checked")){
+                    return true;
+                }else{
+                    jQuery('#myModal').modal({backdrop: 'static', keyboard: false});
+                }
+
+            }else{
+                return true;
+            }
+
+            return false;
+
+        });
+
+    });
+</script>
+
+<div class="container">
+  <h2>Modal Example</h2>
+  <!-- Trigger the modal with a button -->
+  <!-- <button data-target="#myModal" data-toggle="modal" data-backdrop="static" data-keyboard="false">
+    Launch demo modal
+ </button> -->
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog cus-modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content cus-modal-content">
+        <!-- <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div> -->
+
+        <div class="modal-body">
+            <h1>CALIFORNIA</h1>
+            <h3>PROPOSION 65 WARNING</h3>
+            <p>Diesel Engine exhaust and some of its constituents are known to the state of California to cause cancer, birth defects and other reproductive harm.</p>
+
+            <div>
+                <input type="checkbox" name="custom_term_checkbox" id="custom_term_checkbox">
+                <label>Please check this to accept California 65 rules</label>
+            </div>
+            <button type="button" class="btn btn-default" id="custom_term_go">Go</button>
+        </div>
+
+        <!-- <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div> -->
+        
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+<style type="text/css">
+    .cus-modal-content{
+        text-align: center;
+    }
+    .cus-modal-dialog{
+        margin-top: 60px;
+    }
+</style>
+<?php } ?>
+<!--checkout page-->
+
+
+
+<!--After checkout page update-->
+<?php if (is_checkout()) { ?>
+<script type="text/javascript">
+    jQuery(document).ready(function(){ //alert('check');
+
+        //Open model on state selection
+        jQuery(document).on('change', '#billing_state', function(){
+
+            var target = jQuery(this);
+
+            var cus_state = target.find(":selected").val();
+
+            if (cus_state == "CA") { //fire popup box
+
+                //alert(cus_state+' Open popup');
+
+                jQuery('#myModal').show();
+
+            }
+        });
+
+        jQuery(document).on('change', '#shipping_state', function(){
+
+            var target = jQuery(this);
+
+            var cus_state = target.find(":selected").val();
+
+            if (cus_state == "CA") { //fire popup box
+
+                //alert(cus_state+' Open popup');
+
+                jQuery('#myModal').show();
+
+            }
+        });
+        
+        
+        
+        jQuery( document ).on( 'updated_checkout', function() {
+            
+            
+            var cus_state = jQuery('#billing_state').find(":selected").val();
+
+            if (cus_state == "CA") {
+                
+            
+                jQuery('#myModal').show();
+
+            }
+            
+            var cus_state = jQuery('#shipping_state').find(":selected").val();
+
+            if (cus_state == "CA") { //fire popup box
+
+                //alert(cus_state+' Open popup');
+
+                jQuery('#myModal').show();
+
+            }
+        
+        } );
+
+    });
+</script>
+<?php } ?>
+<!--After checkout page update-->
