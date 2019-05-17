@@ -580,7 +580,18 @@ Class null_custom_menu_widget extends WP_Widget {
 /*
 * Start:add shortcode
 */
-function acf_gallery_function(){
+function acf_gallery_function($atts){
+
+  extract( shortcode_atts(
+        array(
+           'id' => '',
+            'content'  => '',
+            "cat_id" => '',
+            "cat_icon_class" => '',
+            "image" => '',
+            ), $atts )
+    );
+
 ob_start();
 
 
@@ -943,10 +954,35 @@ if($post_query_1->have_posts()){
     while( $post_query_1->have_posts() ) { 
         $post_query_1->the_post();
 
-        echo "==>".get_the_ID(); echo "<br>";
-        echo "==>".get_the_title(); echo "<br>";
+        get_the_ID(); 
+        get_the_title(); 
+        get_post_thumbnail_id();
+        echo substr(strip_tags(get_the_content()),0,25)
+        get_the_excerpt();
 
     }
+
+}
+
+
+
+add_action('init', 'chile_init_fun');
+
+function chile_init_fun(){ echo "PPPPPPP";
+
+    $args = array(
+    'posts_per_page'   => 10,
+    'orderby'          => 'date',
+    'order'            => 'DESC',
+    'post_type'        => 'post',
+    'post_status'      => 'publish'
+    );
+
+    $ppppp = get_posts($args);
+
+    echo "<pre>";
+    print_r($ppppp);
+    echo "</pre>";
 
 }
 /* 
@@ -1260,9 +1296,9 @@ Retrieves category data given a category ID or category object.
 /*
 * Start:get path
 */
-echo plugin_dir_path( dirname( __FILE__ ) );   
+echo plugin_dir_path( dirname( __FILE__ ) ); //Get current directory path   
 
-echo plugin_dir_url( dirname( __FILE__ ) );  
+echo plugin_dir_url( dirname( __FILE__ ) );  //Get current directory url  
 
 echo home_url();
  
@@ -1330,25 +1366,6 @@ for ($m=1; $m<=12; $m++) {
 /*
 * End:Get month list from April to March
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1508,4 +1525,185 @@ $wpdb->query( $wpdb->prepare(
 /*
 * End:Basic hooks
 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function customwooupdateqty_shortcode() {
+
+    ob_start();
+    
+    $paged = ( get_query_var('paged') ? get_query_var('paged') : 1 );
+   
+    $loop = new WP_Query( array( 'post_type' => 'product', 'category_name' => '', 'posts_per_page'   => 10, 'paged' => $paged) );
+    if ( $loop->have_posts() ) :
+        while ( $loop->have_posts() ) : $loop->the_post(); ?>
+            
+
+        <div class="pindex">
+            <?php 
+
+            $product_id = get_the_id();
+
+            $_stock = get_post_meta( $product_id, '_stock', true );
+
+            $title = get_the_title();  echo "<br>";
+
+            $_stock_status = get_post_meta($product_id, '_stock_status', true);
+
+            $_manage_stock = get_post_meta($product_id, '_manage_stock', true);
+
+            $product = wc_get_product($product_id);
+
+
+            if ($product->is_type('simple') ) {
+                $product_type = 'simple';        
+            }elseif ($product->is_type('variable') ) {
+                $product_type = 'variable';   
+
+               /* $childs = $product->get_children();
+                echo "<pre>";
+                print_r($childs);*/
+
+            }
+            else{
+                //
+            }
+
+            echo '<h3>product_type : '.$product_type; echo "</h3><br>";
+
+            if($_stock == 0 && $_stock!=NULL && $_manage_stock == 'yes' && $_stock_status == 'instock' && $product_type == 'simple')
+            {
+                echo "If Qty = 0, _manage_stock = yes and _stock_status = instock, simple"; echo "<br>";
+                echo 'title: '.$title; echo "<br>";
+                echo 'product_id: '.$product_id; echo "<br>";
+                echo '_stock: '.$_stock; echo "<br>";
+                echo '_manage_stock: '.$_manage_stock; echo "<br>";
+                echo '_stock_status: '.$_stock_status; echo "<br>";
+                //update_post_meta($product_id, '_manage_stock', 'no');
+                //update_post_meta($product_id, '_stock_status', 'outofstock'); // //instock  outofstock
+            }
+            else
+            {
+                echo "Qty:true"; echo "<br>";
+                echo 'title: '.$title; echo "<br>";
+                echo 'product_id: '.$product_id; echo "<br>";
+                echo '_stock: '.$_stock; echo "<br>";
+                echo '_manage_stock: '.$_manage_stock; echo "<br>";
+                echo '_stock_status: '.$_stock_status; echo "<br>";
+            }
+            ?>
+        </div>
+
+
+        <?php endwhile;
+       
+
+        /* 
+        * add pagination
+        */ 
+
+                echo '<style>.pagination {
+                    clear:both;
+                    position:relative;
+                    font-size:11px; /* Pagination text size */
+                    line-height:13px;
+                        margin: 0 auto;
+                    width: 40%;
+                }
+                 
+                .pagination span, .pagination a {
+                    display:block;
+                    float:left;
+                    margin: 2px 2px 2px 0;
+                    padding:6px 9px 5px 9px;
+                    text-decoration:none;
+                    width:auto;
+                    color:#fff; /* Pagination text color */
+                    background: #555; /* Pagination non-active background color */
+                    -webkit-transition: background .15s ease-in-out;
+                    -moz-transition: background .15s ease-in-out;
+                    -ms-transition: background .15s ease-in-out;
+                    -o-transition: background .15s ease-in-out;
+                    transition: background .15s ease-in-out;
+                }
+                 
+                .pagination a:hover{
+                    color:#fff;
+                    background: #6AAC70; /* Pagination background on hover */
+                }
+                 
+                .pagination .current{
+                    padding:6px 9px 5px 9px;
+                    background: #6AAC70; /* Current page background */
+                    color:#fff;
+                }</style>';
+
+
+                function pagination($pages = '', $range = 4)
+                {  
+                     $showitems = ($range * 2)+1;  
+                 
+                     global $paged;
+                     if(empty($paged)) $paged = 1;
+                 
+                     if($pages == '')
+                     {
+                         global $wp_query;
+                         $pages = $wp_query->max_num_pages;
+                         if(!$pages)
+                         {
+                             $pages = 1;
+                         }
+                     }   
+                 
+                     if(1 != $pages)
+                     {
+                         echo "<div class=\"pagination\"><span>Page ".$paged." of ".$pages."</span>";
+                         if($paged > 2 && $paged > $range+1 && $showitems < $pages) echo "<a href='".get_pagenum_link(1)."'>&laquo; First</a>";
+                         if($paged > 1 && $showitems < $pages) echo "<a href='".get_pagenum_link($paged - 1)."'>&lsaquo; Previous</a>";
+                 
+                         for ($i=1; $i <= $pages; $i++)
+                         {
+                             if (1 != $pages &&( !($i >= $paged+$range+1 || $i <= $paged-$range-1) || $pages <= $showitems ))
+                             {
+                                 echo ($paged == $i)? "<span class=\"current\">".$i."</span>":"<a href='".get_pagenum_link($i)."' class=\"inactive\">".$i."</a>";
+                             }
+                         }
+                 
+                         if ($paged < $pages && $showitems < $pages) echo "<a href=\"".get_pagenum_link($paged + 1)."\">Next &rsaquo;</a>";  
+                         if ($paged < $pages-1 &&  $paged+$range-1 < $pages && $showitems < $pages) echo "<a href='".get_pagenum_link($pages)."'>Last &raquo;</a>";
+                         echo "</div>\n";
+                     }
+                }
+  
+                pagination($loop->max_num_pages); 
+        /* 
+        * add pagination
+        */ 
+
+
+    endif;
+    wp_reset_postdata();
+
+        
+    
+        /**/
+
+    $output = ob_get_contents(); // end output buffering
+    ob_end_clean(); // grab the buffer contents and empty the buffer
+    return $output;
+}
+//add_shortcode('custom-woo-update-qty', 'customwooupdateqty_shortcode');
 ?>
