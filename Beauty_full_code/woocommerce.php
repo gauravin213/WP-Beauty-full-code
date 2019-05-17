@@ -471,3 +471,72 @@ function wpa83367_price_html( $price, $product ){
 </script>
 <?php } ?>
 <!--After checkout page update-->
+
+
+
+<!--custom tab-->
+<?php
+add_filter( 'woocommerce_product_tabs', 'woo_custom_product_tabs' );
+function woo_custom_product_tabs( $tabs ) {
+
+    //unset( $tabs['description'] );  // Remove the description tab
+  
+    $prod_id = get_the_ID();
+    $cus_woo_tab_technical_doc = get_post_meta($prod_id,'cus_woo_tab_technical_doc',true);
+
+    if ($cus_woo_tab_technical_doc) {
+       // Adds the other products tab
+        $tabs['technical_products_tab'] = array(
+            'title'     => __( 'Technical Doc', 'woocommerce' ),
+            'priority'  => 120,
+            'callback'  => 'woo_technical_products_tab_content'
+        );
+    }
+
+    return $tabs;
+
+}
+
+// New Tab contents
+function woo_technical_products_tab_content() {
+   
+    echo '<h2>Other Products</h2>';
+    $prod_id = get_the_ID();
+    echo'<p>'.get_post_meta($prod_id,'cus_woo_tab_technical_doc',true).'</p>';
+}
+
+
+add_action( 'add_meta_boxes', 'custom_admin_metabox');
+function custom_admin_metabox(){
+
+   add_meta_box( 'cus_woo_tab_technical_doc', 'Product Tab Technical Doc', 'cus_woo_tab_technical_doc', 'product', 'normal', 'low' );
+    
+}
+
+
+function cus_woo_tab_technical_doc(){
+    global $post;
+    $cus_woo_tab_technical_doc = get_post_meta( $post->ID, 'cus_woo_tab_technical_doc', true );
+    $content = $cus_woo_tab_technical_doc;
+    $editor_id = 'mycustomeditor_technical_doc';
+    $settings = array(
+        'tinymce' => array(
+            'height' => 200
+        )
+    );
+    wp_editor( $content, $editor_id, $settings);
+}
+
+
+function destination_save_metabox( $post_id, $post ) {
+    
+    //cus_woo_tab_technical_doc
+    if (isset( $_POST['mycustomeditor_technical_doc'] ) ) {
+        $sanitized = wp_filter_post_kses( $_POST['mycustomeditor_technical_doc'] );
+        update_post_meta( $post->ID, 'cus_woo_tab_technical_doc', $sanitized );
+    }
+
+}
+add_action( 'save_post', 'destination_save_metabox', 1, 2 );
+?>
+<!--custom tab-->
