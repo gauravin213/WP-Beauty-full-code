@@ -1,0 +1,370 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom Spinrewriter Tool\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-07-17 09:38+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/"
+
+#: admin/html-spin-rewriter-settings.php:7
+#: admin/back/html-spin-rewriter-settings.php:7
+#: admin/back/html-spin-rewriter-settings.php:71
+msgid "Spinrewriter Tool Settings"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:19
+msgid "Spin Rewriter API settings - authentication"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:25
+#: admin/back/html-spin-rewriter-settings.php:18
+msgid "Email Id"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:32
+#: admin/html-spin-rewriter-settings.php:54
+msgid "Note"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:33
+#: admin/html-spin-rewriter-settings.php:55
+msgid "included with every request"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:37
+#: admin/html-spin-rewriter-settings.php:59
+#: admin/html-spin-rewriter-settings.php:89
+#: admin/html-spin-rewriter-settings.php:113
+#: admin/html-spin-rewriter-settings.php:157
+#: admin/html-spin-rewriter-settings.php:186
+#: admin/html-spin-rewriter-settings.php:215
+#: admin/html-spin-rewriter-settings.php:245
+#: admin/html-spin-rewriter-settings.php:275
+#: admin/html-spin-rewriter-settings.php:304
+#: admin/html-spin-rewriter-settings.php:334
+msgid "Description"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:39
+msgid "The email address that youre using with Spin Rewriter."
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:48
+#: admin/back/html-spin-rewriter-settings.php:23
+msgid "Api Key"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:61
+msgid "Your unique API key. It can be found on this page.."
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:71
+msgid "Spin Rewriter API settings - request details"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:76
+#: admin/back/html-spin-rewriter-settings.php:78
+msgid "Auto Protected Terms"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:79
+#: admin/html-spin-rewriter-settings.php:102
+#: admin/html-spin-rewriter-settings.php:147
+#: admin/html-spin-rewriter-settings.php:176
+#: admin/html-spin-rewriter-settings.php:205
+#: admin/html-spin-rewriter-settings.php:234
+#: admin/html-spin-rewriter-settings.php:265
+#: admin/html-spin-rewriter-settings.php:294
+#: admin/html-spin-rewriter-settings.php:324
+#: admin/back/html-spin-rewriter-settings.php:33
+#: admin/back/html-spin-rewriter-settings.php:46
+#: admin/back/html-spin-rewriter-settings.php:57
+#: admin/back/html-spin-rewriter-settings.php:81
+#: admin/back/html-spin-rewriter-settings.php:92
+#: admin/back/html-spin-rewriter-settings.php:104
+#: admin/back/html-spin-rewriter-settings.php:115
+#: admin/back/html-spin-rewriter-settings.php:126
+#: admin/back/html-spin-rewriter-settings.php:137
+#: admin/back/html-spin-rewriter-settings.php:148
+#: admin/back/html-spin-rewriter-settings.php:159
+#: admin/back/html-spin-rewriter-settings.php:170
+msgid "select"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:80
+#: admin/html-spin-rewriter-settings.php:148
+#: admin/html-spin-rewriter-settings.php:177
+#: admin/html-spin-rewriter-settings.php:206
+#: admin/html-spin-rewriter-settings.php:235
+#: admin/html-spin-rewriter-settings.php:266
+#: admin/html-spin-rewriter-settings.php:295
+#: admin/html-spin-rewriter-settings.php:325
+msgid "True"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:81
+#: admin/html-spin-rewriter-settings.php:149
+#: admin/html-spin-rewriter-settings.php:178
+#: admin/html-spin-rewriter-settings.php:207
+#: admin/html-spin-rewriter-settings.php:236
+#: admin/html-spin-rewriter-settings.php:267
+#: admin/html-spin-rewriter-settings.php:296
+#: admin/html-spin-rewriter-settings.php:326
+msgid "False"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:85
+msgid " false (default)"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:91
+msgid ""
+"Should Spin Rewriter automatically protect all Capitalized Words except for "
+"those in the title of your original text?"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:99
+#: admin/back/html-spin-rewriter-settings.php:89
+msgid "Confidence Level"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:103
+#: admin/html-spin-rewriter-settings.php:134
+#: admin/back/html-spin-rewriter-settings.php:93
+msgid "high"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:104
+#: admin/html-spin-rewriter-settings.php:120
+#: admin/back/html-spin-rewriter-settings.php:94
+msgid "low"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:105
+#: admin/html-spin-rewriter-settings.php:127
+#: admin/back/html-spin-rewriter-settings.php:95
+msgid "medium"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:109
+msgid "medium   (default)"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:115
+msgid "The confidence level of the One-Click Rewrite process."
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:122
+msgid ""
+"largest number of synonyms for various words and phrases, least readable "
+"unique variations of text"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:129
+msgid ""
+"relatively reliable synonyms, usually well readable unique variations of "
+"text (default setting)"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:136
+msgid ""
+"only the most reliable synonyms, perfectly readable unique variations of text"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:144
+#: admin/back/html-spin-rewriter-settings.php:101
+msgid "Auto Sentences"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:153
+#: admin/html-spin-rewriter-settings.php:182
+#: admin/html-spin-rewriter-settings.php:211
+#: admin/html-spin-rewriter-settings.php:241
+#: admin/html-spin-rewriter-settings.php:271
+#: admin/html-spin-rewriter-settings.php:300
+#: admin/html-spin-rewriter-settings.php:330
+msgid "false (default)"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:159
+#: admin/html-spin-rewriter-settings.php:188
+msgid "Should Spin Rewriter spin entire paragraphs?"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:165
+#: admin/html-spin-rewriter-settings.php:194
+msgid ""
+"If set to \"true\", some paragraphs will be replaced with a (shorter) spun "
+"variation."
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:173
+#: admin/back/html-spin-rewriter-settings.php:112
+msgid "Auto Paragraphs"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:202
+#: admin/back/html-spin-rewriter-settings.php:123
+msgid "Auto New Paragraphs"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:217
+msgid ""
+"Should Spin Rewriter automatically write additional paragraphs on its own?"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:223
+msgid ""
+"If set to \"true\", the returned spun text will contain additional "
+"paragraphs."
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:231
+#: admin/back/html-spin-rewriter-settings.php:134
+msgid "Auto sentence trees"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:247
+msgid ""
+"Should Spin Rewriter automatically change the entire structure of phrases "
+"and sentences?"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:253
+msgid ""
+"If set to \"true\", Spin Rewriter will change \"If he is hungry, John eats."
+"\" to \"John eats if he is hungry.\" and \"John eats and drinks.\" to \"John "
+"drinks and eats.\""
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:262
+#: admin/back/html-spin-rewriter-settings.php:145
+msgid "Use only synonyms"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:277
+msgid ""
+"Should Spin Rewriter use only synonyms of the original words instead of the "
+"original words themselves?"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:283
+msgid ""
+"If set to \"true\", Spin Rewriter will never use any of the original words "
+"of phrases if there is a synonym available. This significantly improves the "
+"uniqueness of generated spun content."
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:291
+#: admin/back/html-spin-rewriter-settings.php:156
+msgid "Reorder paragraphs"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:306
+msgid ""
+"Should Spin Rewriter intelligently randomize the order of paragraphs and "
+"unordered lists when generating spun text?"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:312
+msgid ""
+"If set to \"true\", Spin Rewriter will randomize the order of paragraphs and "
+"lists where possible while preserving the readability of the text. This "
+"significantly improves the uniqueness of generated spun content."
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:321
+#: admin/back/html-spin-rewriter-settings.php:167
+msgid "Nested spintax"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:336
+msgid ""
+"Should Spin Rewriter also spin single words inside already spun phrases?"
+msgstr ""
+
+#: admin/html-spin-rewriter-settings.php:342
+msgid ""
+"If set to \"true\", the returned spun text might contain 2 levels of nested "
+"spinning syntax."
+msgstr ""
+
+#: templates/html-spinrewriter-tool-editor.php:5
+msgid "Spin Rewriter Tool"
+msgstr ""
+
+#: templates/html-spinrewriter-tool-editor.php:10
+msgid "Please enter text"
+msgstr ""
+
+#: templates/html-spinrewriter-tool-editor.php:16
+msgid "Spin article"
+msgstr ""
+
+#: admin/back/html-spin-rewriter-settings.php:30
+msgid "Spin post after"
+msgstr ""
+
+#: admin/back/html-spin-rewriter-settings.php:34
+#: admin/back/html-spin-rewriter-settings.php:47
+#: admin/back/html-spin-rewriter-settings.php:58
+#: admin/back/html-spin-rewriter-settings.php:82
+#: admin/back/html-spin-rewriter-settings.php:105
+#: admin/back/html-spin-rewriter-settings.php:116
+#: admin/back/html-spin-rewriter-settings.php:127
+#: admin/back/html-spin-rewriter-settings.php:138
+#: admin/back/html-spin-rewriter-settings.php:149
+#: admin/back/html-spin-rewriter-settings.php:160
+#: admin/back/html-spin-rewriter-settings.php:171
+msgid "Yes"
+msgstr ""
+
+#: admin/back/html-spin-rewriter-settings.php:35
+#: admin/back/html-spin-rewriter-settings.php:48
+#: admin/back/html-spin-rewriter-settings.php:59
+#: admin/back/html-spin-rewriter-settings.php:83
+#: admin/back/html-spin-rewriter-settings.php:106
+#: admin/back/html-spin-rewriter-settings.php:117
+#: admin/back/html-spin-rewriter-settings.php:128
+#: admin/back/html-spin-rewriter-settings.php:139
+#: admin/back/html-spin-rewriter-settings.php:150
+#: admin/back/html-spin-rewriter-settings.php:161
+#: admin/back/html-spin-rewriter-settings.php:172
+msgid "No"
+msgstr ""
+
+#: admin/back/html-spin-rewriter-settings.php:43
+msgid "Spin post title"
+msgstr ""
+
+#: admin/back/html-spin-rewriter-settings.php:54
+msgid "Public as new post"
+msgstr ""
+
+#: admin/back/html-spin-rewriter-settings.php:65
+msgid "Do not spin these posts"
+msgstr ""
+
+#: admin/back/html-spin-rewriter-settings.php:179
+msgid "Run"
+msgstr ""
+
+#. Name of the plugin
+msgid "Custom Spinrewriter Tool"
+msgstr ""
+
+#. Description of the plugin
+msgid "This is the Custom Spinrewriter Tool plugin."
+msgstr ""
+
+#. Author of the plugin
+msgid "Clag Dev"
+msgstr ""
