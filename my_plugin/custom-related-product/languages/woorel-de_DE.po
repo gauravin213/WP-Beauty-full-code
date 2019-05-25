@@ -1,0 +1,53 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom Related Product\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-05-23 07:09+0000\n"
+"PO-Revision-Date: 2018-05-23 07:10+0000\n"
+"Last-Translator: admin <gaurav.clagtech@gmail.com>\n"
+"Language-Team: \n"
+"Language: de_DE\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/"
+
+#. Author of the plugin
+msgid "Clag dev"
+msgstr ""
+
+#. Name of the plugin
+msgid "Custom Related Product"
+msgstr ""
+
+#: custom-related-product.php:199
+#, php-format
+msgid "No results found for \"%s\""
+msgstr ""
+
+#: custom-related-product.php:322
+msgid "Search"
+msgstr ""
+
+#: custom-related-product.php:325
+msgid "searching..."
+msgstr ""
+
+#: custom-related-product.php:332
+msgid "Selected"
+msgstr ""
+
+#. Description of the plugin
+msgid ""
+"This is the custom related product plugin which is specially designed for "
+"top class."
+msgstr ""
+
+#: custom-related-product.php:314
+msgid "Title"
+msgstr ""
+
+#: custom-related-product.php:326
+msgid "Type any keyword to search"
+msgstr ""

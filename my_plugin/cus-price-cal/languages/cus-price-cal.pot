@@ -1,0 +1,136 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom Price Calculator\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-26 07:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/"
+
+#: cus-price-cal.php:131 cus-price-cal.php:456
+msgid "Qty"
+msgstr ""
+
+#: cus-price-cal.php:140 cus-price-cal.php:236 cus-price-cal.php:465
+#: cus-price-cal.php:530
+msgid "Price"
+msgstr ""
+
+#: cus-price-cal.php:204
+msgid "CusPriceCal"
+msgstr ""
+
+#: cus-price-cal.php:227
+msgid "Enable"
+msgstr ""
+
+#: cus-price-cal.php:231 cus-price-cal.php:545
+msgid "Screen Setup Fees"
+msgstr ""
+
+#: cus-price-cal.php:235
+msgid "qty"
+msgstr ""
+
+#: cus-price-cal.php:237
+msgid "1clr"
+msgstr ""
+
+#: cus-price-cal.php:238
+msgid "2clr"
+msgstr ""
+
+#: cus-price-cal.php:239
+msgid "3clr"
+msgstr ""
+
+#: cus-price-cal.php:240
+msgid "4clr"
+msgstr ""
+
+#: cus-price-cal.php:241
+msgid "5clr"
+msgstr ""
+
+#: cus-price-cal.php:242
+msgid "6clr"
+msgstr ""
+
+#: cus-price-cal.php:243
+msgid "7clr"
+msgstr ""
+
+#: cus-price-cal.php:244
+msgid "8clr"
+msgstr ""
+
+#: cus-price-cal.php:478
+msgid "Enter qty"
+msgstr ""
+
+#: cus-price-cal.php:515
+msgid "Select locations"
+msgstr ""
+
+#: cus-price-cal.php:517
+msgid "Print front"
+msgstr ""
+
+#: cus-price-cal.php:518
+msgid "Print back"
+msgstr ""
+
+#: cus-price-cal.php:519
+msgid "Print sleeve"
+msgstr ""
+
+#: cus-price-cal.php:534
+msgid "Impint color cost"
+msgstr ""
+
+#: cus-price-cal.php:538
+msgid "Locations"
+msgstr ""
+
+#: cus-price-cal.php:542
+msgid "shirt Price"
+msgstr ""
+
+#: cus-price-cal.php:548
+msgid "Price per piece"
+msgstr ""
+
+#: cus-price-cal.php:551
+msgid "Options total"
+msgstr ""
+
+#: cus-price-cal.php:554
+msgid "Grand total"
+msgstr ""
+
+#: cus-price-cal.php:560
+msgid "Not fount any commbination of qty "
+msgstr ""
+
+#: cus-price-cal.php:562
+msgid "and ammount of color from pricing table"
+msgstr ""
+
+#. Name of the plugin
+msgid "Custom Price Calculator"
+msgstr ""
+
+#. Description of the plugin
+msgid "This is the custom price calculator plugin"
+msgstr ""
+
+#. Author of the plugin
+msgid "Clag Dev"
+msgstr ""

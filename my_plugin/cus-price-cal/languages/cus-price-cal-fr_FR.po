@@ -1,0 +1,94 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom Price Calculator\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-20 07:35+0000\n"
+"PO-Revision-Date: 2018-06-20 07:38+0000\n"
+"Last-Translator: admin <gaurav.clagtech@gmail.com>\n"
+"Language-Team: \n"
+"Language: fr_FR\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/"
+
+#: cus-price-cal.php:511
+msgid "and ammount of color from pricing table"
+msgstr ""
+
+#. Author of the plugin
+msgid "Clag Dev"
+msgstr ""
+
+#: cus-price-cal.php:146
+msgid "CusPriceCal"
+msgstr ""
+
+#. Name of the plugin
+msgid "Custom Price Calculator"
+msgstr ""
+
+#: cus-price-cal.php:427
+msgid "Enter qty"
+msgstr ""
+
+#: cus-price-cal.php:503
+msgid "Grand total"
+msgstr ""
+
+#: cus-price-cal.php:483
+msgid "Impint color cost"
+msgstr ""
+
+#: cus-price-cal.php:487
+msgid "Locations"
+msgstr ""
+
+#: cus-price-cal.php:509
+msgid "Not fount any commbination of qty "
+msgstr ""
+
+#: cus-price-cal.php:500
+msgid "Options total"
+msgstr ""
+
+#: cus-price-cal.php:479
+msgid "Price"
+msgstr ""
+
+#: cus-price-cal.php:497
+msgid "Price per piece"
+msgstr ""
+
+#: cus-price-cal.php:467
+msgid "Print back"
+msgstr ""
+
+#: cus-price-cal.php:466
+msgid "Print front"
+msgstr ""
+
+#: cus-price-cal.php:468
+msgid "Print sleeve"
+msgstr ""
+
+#: cus-price-cal.php:432
+msgid "Select color"
+msgstr ""
+
+#: cus-price-cal.php:464
+msgid "Select locations"
+msgstr ""
+
+#: cus-price-cal.php:491
+msgid "shirt Price"
+msgstr ""
+
+#: cus-price-cal.php:494
+msgid "Standard free"
+msgstr ""
+
+#. Description of the plugin
+msgid "This is the custom price calculator plugin"
+msgstr ""
