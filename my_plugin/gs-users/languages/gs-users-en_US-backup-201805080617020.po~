@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Gs Users\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-05-08 06:16+0000\n"
+"PO-Revision-Date: 2018-05-08 06:16+0000\n"
+"Last-Translator: gauravin213 <gauravin213@gmail.com>\n"
+"Language-Team: \n"
+"Language: en_US\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/"
+
+#: admin/dashboard.php:2
+msgid "Dashbord"
+msgstr ""
+
+#. Author of the plugin
+msgid "Gaurav Sharma"
+msgstr ""
+
+#. Name of the plugin
+msgid "Gs Users"
+msgstr ""
+
+#: templates/login-ar.php:9
+msgid "Log Out"
+msgstr ""
+
+#: templates/login-ar.php:15
+msgid "Login"
+msgstr ""
+
+#: templates/login-ar.php:43
+msgid "Password"
+msgstr ""
+
+#: templates/reg-ar.php:2
+msgid "Registration"
+msgstr ""
+
+#: templates/login-ar.php:48
+msgid "Remember Me"
+msgstr ""
+
+#. Description of the plugin
+msgid "This is the gs magenages users  plugin"
+msgstr ""
+
+#: templates/login-ar.php:39
+msgid "Username or Email"
+msgstr ""
+
+#: gs-users.php:143
+msgid "Yes"
+msgstr ""
+
+#: templates/login-ar.php:8
+msgid "You have loged in"
+msgstr ""

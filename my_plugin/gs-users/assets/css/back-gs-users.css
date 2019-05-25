@@ -1,0 +1,22 @@
+/*
+* Backend style back-gs-users.css
+*/
+
+.block-status-col-active{
+	background-color: #4b8c4b;
+    color: #fff;
+    padding: 5px;
+    border-radius: 2px;
+}
+
+.block-status-col-inactive{
+	background-color: #bd5252;
+    color: #fff;
+    padding: 5px;
+    border-radius: 2px;
+}
+
+.gs-user-edit-dev{
+	border: 1px solid #dcbdbd;
+    padding: 10px;
+}
