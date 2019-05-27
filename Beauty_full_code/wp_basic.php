@@ -56,6 +56,24 @@ add_action( 'wp_enqueue_scripts', 'salient_child_enqueue_styles');
 
 add_action( 'admin_enqueue_scripts', 'salient_child_enqueue_styles');
 
+
+
+//Dequeue Styles
+function project_dequeue_unnecessary_styles() {
+    wp_dequeue_style( 'bootstrap-map' );
+        wp_deregister_style( 'bootstrap-map' );
+}
+add_action( 'wp_print_styles', 'project_dequeue_unnecessary_styles' );
+
+//Dequeue JavaScripts
+function project_dequeue_unnecessary_scripts() {
+    wp_dequeue_script( 'modernizr-js' );
+        wp_deregister_script( 'modernizr-js' );
+    wp_dequeue_script( 'project-js' );
+        wp_deregister_script( 'project-js' );
+}
+add_action( 'wp_print_scripts', 'project_dequeue_unnecessary_scripts' );
+
 /*
 *  End:wp_enqueue_scripts action
 */
@@ -238,6 +256,26 @@ add_action( 'pre_get_posts', 'add_role_filter_to_posts_query' );
 /*
 * End:Add custom role to access spacifice post type
 */
+
+
+/*
+* Start:register_post_type_args filter
+*/ 
+function wp1482371_custom_post_type_args( $args, $post_type ) {
+    if ( $post_type == "testimonial" ) {
+     
+        $args['supports'] = array( 'title', 'editor', 'comments');
+
+        $args['capability_type'] = array('psp_project','psp_projects'),
+
+    }
+
+    return $args;
+}
+add_filter( 'register_post_type_args', 'wp1482371_custom_post_type_args', 20, 2 );
+/*
+* End:register_post_type_args filter
+*/ 
 
 
 
@@ -990,24 +1028,6 @@ function chile_init_fun(){ echo "PPPPPPP";
 */
 
 
-/*
-* Start:register_post_type_args filter
-*/ 
-function wp1482371_custom_post_type_args( $args, $post_type ) {
-    if ( $post_type == "testimonial" ) {
-     
-        $args['supports'] = array( 'title', 'editor', 'comments');
-    }
-
-    return $args;
-}
-add_filter( 'register_post_type_args', 'wp1482371_custom_post_type_args', 20, 2 );
-/*
-* End:register_post_type_args filter
-*/ 
-
-
-
 
 
 
@@ -1706,4 +1726,93 @@ function customwooupdateqty_shortcode() {
     return $output;
 }
 //add_shortcode('custom-woo-update-qty', 'customwooupdateqty_shortcode');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+foreach( array( 'edit-post', 'edit-page', 'edit-movie', 'upload' ) as $hook )
+
+add_filter( "views_$hook" , 'wpse_30331_custom_view_count', 10, 1);
+
+function wpse_30331_custom_view_count( $views ) 
+{
+    global $current_screen;
+    switch( $current_screen->id ) 
+    {
+        case 'edit-post':
+            $views = wpse_30331_manipulate_views( 'post', $views );
+            break;
+        case 'edit-page':
+            $views = wpse_30331_manipulate_views( 'page', $views );
+            break;
+    }
+    return $views;
+}
+
+function wpse_30331_manipulate_views( $what, $views )
+{
+    global $user_ID, $wpdb;
+
+    /*
+     * This is not working for me, 'artist' and 'administrator' are passing this condition (?)
+     */
+    if ( !current_user_can('artist') ) 
+        return $views;
+
+    /*
+     * This needs refining, and maybe a better method
+     * e.g. Attachments have completely different counts 
+     */
+    $total = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'publish' OR post_status = 'draft' OR post_status = 'pending') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+    $publish = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'publish' AND post_author = '$user_ID' AND post_type = '$what' ");
+    $draft = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'draft' AND post_author = '$user_ID' AND post_type = '$what' ");
+    $pending = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'pending' AND post_author = '$user_ID' AND post_type = '$what' ");
+
+    /*
+     * Only tested with Posts/Pages
+     * - there are moments where Draft and Pending shouldn't return any value
+     */
+    $views['all'] = preg_replace( '/\(.+\)/U', '('.$total.')', $views['all'] ); 
+    $views['publish'] = preg_replace( '/\(.+\)/U', '('.$publish.')', $views['publish'] ); 
+    $views['draft'] = preg_replace( '/\(.+\)/U', '('.$draft.')', $views['draft'] ); 
+    $views['pending'] = preg_replace( '/\(.+\)/U', '('.$pending.')', $views['pending'] ); 
+
+    // Debug info
+    //echo 'Default counts: <pre>'.print_r($views,true).'</pre>';
+    //echo '<hr><hr>';
+    //echo 'Query for this screen of this post_type: <b>'.$what.'</b><pre>'.print_r($wp_query,true).'</pre>';
+
+    return $views;
+}
 ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
