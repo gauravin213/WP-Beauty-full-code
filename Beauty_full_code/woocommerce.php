@@ -540,3 +540,196 @@ function destination_save_metabox( $post_id, $post ) {
 add_action( 'save_post', 'destination_save_metabox', 1, 2 );
 ?>
 <!--custom tab-->
+
+
+
+
+<?php
+/*
+ * Custom Register as Wholesale checkbox [May 14, 2019]
+*/
+function wooc_extra_register_fields() {?>
+    <p class="form-row form-row-wide" id="woocommerce_my_account_page_checkbox_field" data-priority="">
+        <input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="woocommerce_my_account_page_checkbox" id="woocommerce_my_account_page_checkbox" value="1">
+        <label class="woocommerce-form__label woocommerce-form__label-for-checkbox inline"><span><?php esc_html_e('Register as wholesaler', 'woocommerce'); ?></span></label>
+    </p>
+    <?php
+}
+//add_action( 'woocommerce_register_form', 'wooc_extra_register_fields', 5 );
+
+function wooc_save_extra_register_fields($customer_id) {
+   if ( isset( $_POST['woocommerce_my_account_page_checkbox'] ) ) {
+       update_user_meta( $customer_id, 'woocommerce_my_account_page_checkbox', sanitize_text_field( $_POST['woocommerce_my_account_page_checkbox'] ) );
+       wp_update_user( array ('ID' => $customer_id, 'role' => 'wholesale_customer') );
+   }
+}
+//add_action( 'woocommerce_created_customer', 'wooc_save_extra_register_fields' ); 
+/*
+ * Custom Register as Wholesale checkbox [May 14, 2019]
+*/
+
+
+
+/*
+* Add custom element after terms & condition
+*/
+add_action('woocommerce_checkout_after_terms_and_conditions', 'checkout_additional_checkboxes');
+function checkout_additional_checkboxes( ){
+    ?>
+    <p class="form-row custom-checkboxes" id="myModal" style="display: none;">
+        <?php 
+        if (isset($_POST['billing_state'])) {
+           echo "string";
+        }
+        ?>
+       <img src="<?php echo home_url().'/wp-content/themes/ydg-theme-child/images/alert-a2.png'?>">
+       California Proposition 65 requires businesses to provide warnings to Californians about significant exposure to chemicals that cause cancer, birth defects, or other reproductive harm. Add details about the warning you want to show California buyers. We'll add a warning symbol and the word 'WARNING:' before the description you enter here, and we’ll add 'For more information go to www.p65warnings.ca.gov' following your description.
+    </p>
+    
+    <style>
+        #myModal{
+            border: 1px solid #efe9e9;
+        }
+    </style>
+    <?php
+}
+/*
+* Add custom element after terms & condition
+*/
+
+
+/*
+* Set Order View
+*/
+add_filter( "views_edit-shop_order" , 'custom_view_count', 10, 1);
+function custom_view_count($views){
+
+    global $current_screen;
+
+    $user_id = get_current_user_id(); 
+    $user_meta = get_userdata($user_id);
+    $user_roles = $user_meta->roles;
+    /*echo "<pre>";
+    print_r($views);
+    echo "</pre>";
+    die();*/
+        
+    if ( count($user_roles) == 1) {
+           
+        if ( in_array( 'wholesale_customer', $user_roles, true ) ) {
+
+            switch( $current_screen->id ) 
+            {
+                case 'edit-shop_order':
+                    $views = wpse_30331_manipulate_views( 'shop_order', $views );
+                    break;
+            }
+
+        }
+    }
+    
+    return $views;
+}
+
+function wpse_30331_manipulate_views( $what, $views )
+{
+
+    global $user_ID, $wpdb;
+    
+    /*
+     * This needs refining, and maybe a better method
+     * e.g. Attachments have completely different counts 
+     */
+    $total = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'wc-pending' OR post_status = 'wc-processing' OR post_status = 'wc-on-hold' OR post_status = 'wc-completed' OR post_status = 'wc-cancelled' OR post_status = 'wc-refunded' OR post_status = 'wc-failed' ) AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+    $trash = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'trash') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+    $pending = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'wc-pending') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+
+    $processing = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'wc-processing') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+    $on_hold = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'wc-on-hold') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+    $completed = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'wc-completed') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+    $cancelled = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'wc-cancelled') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+    $refunded = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'wc-refunded') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+    $failed = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'wc-failed') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
+    $views['all'] = preg_replace( '/\(.+\)/U', '('.$total.')', $views['all'] ); 
+
+    $views['trash'] = preg_replace( '/\(.+\)/U', '('.$trash.')', $views['trash'] ); 
+
+    $views['wc-pending'] = preg_replace( '/\(.+\)/U', '('.$pending.')', $views['wc-pending'] ); 
+
+    $views['wc-processing'] = preg_replace( '/\(.+\)/U', '('.$processing.')', $views['wc-processing'] ); 
+
+    $views['wc-on-hold'] = preg_replace( '/\(.+\)/U', '('.$on_hold.')', $views['wc-on-hold'] ); 
+
+    $views['wc-completed'] = preg_replace( '/\(.+\)/U', '('.$completed.')', $views['wc-completed'] ); 
+
+    $views['wc-cancelled'] = preg_replace( '/\(.+\)/U', '('.$cancelled.')', $views['wc-cancelled'] ); 
+
+    $views['wc-refunded'] = preg_replace( '/\(.+\)/U', '('.$refunded.')', $views['wc-refunded'] ); 
+
+    $views['wc-failed'] = preg_replace( '/\(.+\)/U', '('.$failed.')', $views['wc-failed'] ); 
+
+    return $views;
+}
+/*
+* Set Order View
+*/
+
+
+/*
+* Add custom tab my account page
+*/
+function bbloomer_add_premium_support_endpoint() {
+    add_rewrite_endpoint( 'premium-support', EP_ROOT | EP_PAGES );
+}
+  
+add_action( 'init', 'bbloomer_add_premium_support_endpoint' );
+  
+  
+// ------------------
+// 2. Add new query var
+  
+function bbloomer_premium_support_query_vars( $vars ) {
+    $vars[] = 'premium-support';
+    return $vars;
+}
+  
+add_filter( 'query_vars', 'bbloomer_premium_support_query_vars', 0 );
+  
+  
+// ------------------
+// 3. Insert the new endpoint into the My Account menu
+  
+function bbloomer_add_premium_support_link_my_account( $items ) {
+    $items['premium-support'] = 'Premium Support';
+    return $items;
+}
+  
+add_filter( 'woocommerce_account_menu_items', 'bbloomer_add_premium_support_link_my_account' );
+  
+  
+// ------------------
+// 4. Add content to the new endpoint
+  
+function bbloomer_premium_support_content() {
+echo '<h3>Premium WooCommerce Support</h3><p>Welcome to the WooCommerce support area. As a premium customer, you can submit a ticket should you have any WooCommerce issues with your website, snippets or customization. <i>Please contact your theme/plugin developer for theme/plugin-related support.</i></p>';
+echo do_shortcode( ' /* your shortcode here */ ' );
+}
+  
+add_action( 'woocommerce_account_premium-support_endpoint', 'bbloomer_premium_support_content' );
+/*
+* Add custom tab my account page
+*/
+
+
+?>
+
+
