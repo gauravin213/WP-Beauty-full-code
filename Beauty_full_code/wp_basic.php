@@ -148,6 +148,96 @@ add_action( 'wp_print_scripts', 'project_dequeue_unnecessary_scripts' );
 
 
 /*
+* Start:Version 2 Add custom role to access spacifice post type
+*/
+function allow_new_role_uploads() {
+
+    //remove_role("custom_user");
+    add_role('custom_user','Custom User');
+
+    // gets the administrator role
+    $role = get_role( 'custom_user' );
+
+    //Contributor
+    $role->add_cap( 'delete_posts' );
+    $role->add_cap( 'read');
+    $role->add_cap( 'edit_posts' );
+
+    $role->add_cap( 'read_psp_project');
+    $role->add_cap( 'read_private_psp_projects' );
+    $role->add_cap( 'edit_psp_project' );
+    $role->add_cap( 'edit_psp_projects' );
+    $role->add_cap( 'edit_others_psp_projects' );
+    $role->add_cap( 'edit_published_psp_projects' );
+    $role->add_cap( 'publish_psp_projects' );
+    $role->add_cap( 'delete_others_psp_projects' );
+    $role->add_cap( 'delete_private_psp_projects' );
+    $role->add_cap( 'delete_published_psp_projects' );
+
+}
+add_action('admin_init', 'allow_new_role_uploads');
+
+
+
+/*function custom_woocommerce_register_post_type_shop_order($args){
+
+    $user_id = get_current_user_id(); 
+    $user_meta = get_userdata($user_id);
+    $user_roles = $user_meta->roles;
+
+    if ( in_array( 'custom_user', $user_roles, true ) ) {
+
+        $args['capability_type'] = "";
+        $args['capability_type'] = array('shop_order','psp_projects');
+        return $args;
+    }
+    return $args;
+
+}
+add_filter('woocommerce_register_post_type_shop_order', 'custom_woocommerce_register_post_type_shop_order');*/
+
+
+
+function wp1482371_custom_post_type_args( $args, $post_type ) {
+
+
+    $user_id = get_current_user_id(); 
+    $user_meta = get_userdata($user_id);
+    $user_roles = $user_meta->roles;
+
+    if ( in_array( 'custom_user', $user_roles, true ) ) {
+
+        if ( $post_type == "shop_order" ) {
+            $args['capability_type'] = "";
+            $args['capability_type'] = array('shop_order','psp_projects');
+            return $args;
+        }
+    }
+  
+    return $args;
+}
+add_filter( 'register_post_type_args', 'wp1482371_custom_post_type_args', 20, 2 );
+
+
+function pxln_remove_menu_items() {
+    
+    global $menu;
+    unset($menu[25]);
+    unset($menu[5]);
+    unset($menu[11]);
+    unset($menu[12]);
+    unset($menu[75]);
+    unset($menu[9]);
+    //remove_menu_page( 'tools.php' );
+
+}
+add_action('admin_menu', 'pxln_remove_menu_items');
+
+/*
+* End:Version 2 Add custom role to access spacifice post type
+*/
+
+/*
 * Start:Add custom role to access spacifice post type
 */
 function codex_municipality_init() {
