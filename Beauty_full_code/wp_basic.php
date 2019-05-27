@@ -181,12 +181,8 @@ add_action('admin_init', 'allow_new_role_uploads');
 
 /*function custom_woocommerce_register_post_type_shop_order($args){
 
-    $user_id = get_current_user_id(); 
-    $user_meta = get_userdata($user_id);
-    $user_roles = $user_meta->roles;
-
-    if ( in_array( 'custom_user', $user_roles, true ) ) {
-
+    $get_user_role = get_user_role('custom_user');
+    if ($get_user_role) {
         $args['capability_type'] = "";
         $args['capability_type'] = array('shop_order','psp_projects');
         return $args;
@@ -200,42 +196,58 @@ add_filter('woocommerce_register_post_type_shop_order', 'custom_woocommerce_regi
 
 function wp1482371_custom_post_type_args( $args, $post_type ) {
 
-
-    $user_id = get_current_user_id(); 
-    $user_meta = get_userdata($user_id);
-    $user_roles = $user_meta->roles;
-
-    if ( in_array( 'custom_user', $user_roles, true ) ) {
-
-        if ( $post_type == "shop_order" ) {
+    $get_user_role = get_user_role('custom_user');
+    if ($get_user_role) {
+       if ( $post_type == "shop_order" ) {
             $args['capability_type'] = "";
             $args['capability_type'] = array('shop_order','psp_projects');
             return $args;
         }
     }
-  
     return $args;
 }
 add_filter( 'register_post_type_args', 'wp1482371_custom_post_type_args', 20, 2 );
 
 
 function pxln_remove_menu_items() {
-    
-    global $menu;
-    unset($menu[25]);
-    unset($menu[5]);
-    unset($menu[11]);
-    unset($menu[12]);
-    unset($menu[75]);
-    unset($menu[9]);
-    //remove_menu_page( 'tools.php' );
 
+    global $menu;
+
+    $get_user_role = get_user_role('custom_user');
+    if ($get_user_role) {
+        unset($menu[25]);
+        unset($menu[5]);
+        unset($menu[11]);
+        unset($menu[12]);
+        unset($menu[75]);
+        unset($menu[9]);
+        //remove_menu_page( 'tools.php' );
+    }
+    
 }
 add_action('admin_menu', 'pxln_remove_menu_items');
 
+
+
+function get_user_role($user_role){
+
+    $user_id = get_current_user_id(); 
+    $user_meta = get_userdata($user_id);
+    $user_roles = $user_meta->roles;
+
+    if ( in_array($user_role, $user_roles, true ) ) {
+        return true;
+    }else{
+        return false;
+    }
+
+}
 /*
 * End:Version 2 Add custom role to access spacifice post type
 */
+
+
+
 
 /*
 * Start:Add custom role to access spacifice post type
