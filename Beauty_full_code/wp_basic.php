@@ -1041,6 +1041,11 @@ add_action( 'admin_enqueue_scripts', 'rr_scripts' );
 /* 
 * Start:Post argument
 */
+
+//Posts arguments 
+https://www.billerickson.net/code/wp_query-arguments/
+
+
 $args = array(
     'posts_per_page'   => -1,
     'offset'           => 0,
@@ -1108,7 +1113,9 @@ if($post_query_1->have_posts()){
 
 add_action('init', 'chile_init_fun');
 
-function chile_init_fun(){ echo "PPPPPPP";
+function chile_init_fun(){ 
+
+    //echo "PPPPPPP";
 
     $args = array(
     'posts_per_page'   => 10,
