@@ -1,9 +1,61 @@
 <?php
+/*
+* wp search add post type
+*/
+add_filter( 'pre_get_posts', 'tgm_io_cpt_search' );
+function tgm_io_cpt_search( $query ) {
+    
+    if ( $query->is_search ) {
+         $query->set( 'post_type', array( 'post', 'product', 'page' ) );
+    }
+    
+    return $query;
+    
+}
+/*
+* wp search add post type
+*/
 
+
+
+  
+/**
+ * Change number of products that are displayed per page (shop page)
+ */
+add_filter( 'loop_shop_per_page', 'new_loop_shop_per_page', 20 );
+
+function new_loop_shop_per_page( $cols ) {
+  // $cols contains the current number of products per page based on the value stored on Options -> Reading
+  // Return the number of products you wanna show per page.
+  $cols = 9;
+  return $cols;
+}
+
+
+
+https://iconicwp.com/blog/update-custom-cart-count-html-ajax-add-cart-woocommerce/
 // woocommerce addon
 // js composer addon
 // contact form7 addon
 // Widget 
+
+/*
+* get theme mode
+*/
+$ppp = get_option('theme_mods_{theme-name}');
+
+echo "<pre>";
+
+echo '<h1>Testing</h1>';
+
+//echo get_custom_logo( 37072 );
+
+print_r($ppp);
+echo "</pre>";
+/*
+* get theme mode
+*/
+
 
 /*
 *  Start:wp_enqueue_scripts action
@@ -514,12 +566,6 @@ function save_extra_user_profile_fields( $user_id ) {
 /*
 * Start:Add custom column on post grid
 */
-add_action( 'edit_form_after_title', 'my_custom_fun' );
-function my_custom_fun($post_id){
-
-}
-
-
 //filter grid column 
 add_action( 'manage_edit-my_custom_activity_columns', 'my_custom_fun'); 
 function my_custom_edit_movie_columns($columns) { 
@@ -532,7 +578,7 @@ function my_custom_edit_movie_columns($columns) {
             'date' => __( 'Date' )
         );
 
-        return $columns;
+    return $columns;
 }
 
 
@@ -791,6 +837,23 @@ function ajax_function(){
         success: function (response) { 
         }
     });
+
+
+     var qty = '111';
+       
+    jQuery.ajax({
+        url: '<?php echo admin_url( 'admin-ajax.php');?>',
+        type: "POST",
+        data: {'action': 'set_whole_sale_data', enterd_qty: qty},
+        cache: false,
+        dataType: 'json',
+        beforeSend: function(){
+        },
+        complete: function(){
+        },
+        success: function (response) {  alert(response);
+        }
+    });
 </script>
 <?php
 /*
@@ -1046,7 +1109,7 @@ add_action( 'admin_enqueue_scripts', 'rr_scripts' );
 https://www.billerickson.net/code/wp_query-arguments/
 
 
-$args = array(
+$args = array( //77392
     'posts_per_page'   => -1,
     'offset'           => 0,
     'category'         => $kategory,
@@ -1387,33 +1450,76 @@ add_shortcode( 'get_upcoming_events_list', 'upcoming_events' );
 * End:get sub category by cat id
 */
 
-
+sizeof()
 
 /*
 * get post category by post id 
 * Return textonomi detaisl + categoty details like category count, description etc..
 */
+
+//get term id by post and textonomi
+//Note : working for both native and custom post_type
 get_the_terms( int|object $post, string $taxonomy )
-Retrieve the terms of the taxonomy that are attached to the post.
 
+//get category by post id
+//Note : This is working only for native post_type
+get_the_category( $post_id ) //post id
+
+
+
+//get all categories by textonomi
 get_terms(); //taxonomy
-Get custom post type categories
 
+//get single category by term id
 get_term( int|WP_Term|object $term, string $taxonomy = '', string $output = OBJECT, string $filter = 'raw' )
-Get all Term data from database by Term ID.
 
-
-
-
-
-get_the_category( int $id = false ) //post id
-Retrieve post categories.
-
-get_categories( string|array $args = '' ) //taxonomy
-Retrieve list of category objects.
-
+//get single category by term id
+//Note : It is working only for native post_type
 get_category( int|object $category, string $output = OBJECT, string $filter = 'raw' )
-Retrieves category data given a category ID or category object.
+
+
+
+//Get child category
+$args = array(
+       'hierarchical' => 1,
+       'show_option_none' => '',
+       'hide_empty' => 0,
+       'parent' => $term_id,
+       'taxonomy' => $taxonomy,
+       //'orderby' => 'term_id',
+       //'order'   => 'DESC'
+    );
+get_categories( $args ) 
+
+
+
+
+
+
+$category_slug = 'demo-cat';
+$taxonomy = 'product_cat';
+$get_term = get_term_by( 'slug', $category_slug , $taxonomy );
+echo $term_id =  $get_term->term_id;
+
+$args = array(
+   'hierarchical' => 1,
+   'show_option_none' => '',
+   'hide_empty' => 0,
+   'parent' => $term_id,
+   'taxonomy' => $taxonomy
+);
+$subcats = get_categories($args);
+  
+echo '<pre>';
+print_r($subcats);
+echo '</pre>';
+
+echo '<ul class="wooc_sclist">';
+foreach ($subcats as $sc) {
+$link = get_term_link( $sc->slug, $sc->taxonomy );
+  echo '<li><a href="'. $link .'">'.$sc->name.'</a></li>';
+}
+echo '</ul>';
 
 /*
 * get post category by post id 
@@ -1908,7 +2014,119 @@ function wpse_30331_manipulate_views( $what, $views )
     //echo 'Query for this screen of this post_type: <b>'.$what.'</b><pre>'.print_r($wp_query,true).'</pre>';
 
     return $views;
+
+    print_r(expression)
 }
+
+
+
+/*
+* Registerted custom menus
+*/
+function wpmm_setup() {
+
+    register_nav_menus( array(
+        'regions_menu' => 'Regions Menu'
+    ) );
+
+    register_nav_menus( array(
+        'popular_destinations_menu' => 'Most Popular destinations Menu'
+    ) );
+
+    register_nav_menus( array(
+        'interest_types_menu' => 'Interest types Menu'
+    ) );
+
+    register_nav_menus( array(
+        'safari_holidays_menu' => 'Safari holidays Menu'
+    ) );
+
+    register_nav_menus( array(
+        'ideas_by_month_menu' => 'Ideas by month Menu'
+    ) );
+
+    register_nav_menus( array(
+        'other_inspiration_menu' => 'Other inspiration Menu'
+    ) );
+
+}
+add_action( 'after_setup_theme', 'wpmm_setup' );
+
+wp_nav_menu( array(
+    'theme_location' => $aventura_location_menu,
+    'menu_class'     => 'nav navbar-nav collapse navbar-collapse tz-nav',
+    'menu_id'        => 'tz-navbar-collapse-scroll',
+    'container'      => false,
+) ) ;
+
+wp_nav_menu(array(
+    'theme_location' => 'bar',
+    'items_wrap'     => '<ul id="%1$s" class="fl-page-bar-nav nav navbar-nav %2$s">%3$s</ul>',
+    'container'      => false,
+    'fallback_cb'    => 'FLTheme::nav_menu_fallback',
+    
+    'menu_id' => 'custom_right_menu_id',
+    'menu_class' => 'custom_right_menu_class',
+));
+
+if ($menu_type == 'regions_menu') {
+
+      ?>
+
+      <ul class="<?php echo $menu_type;?>">
+          <?php
+          $locations = get_nav_menu_locations();
+          if ( isset( $locations[ $menu_type ] ) ) {
+              $menu = get_term( $locations[ $menu_type ], 'nav_menu' );
+              if ( $items = wp_get_nav_menu_items( $menu->name ) ) {
+                                  
+                  foreach ( $items as $item ) { 
+
+                      echo '<li>';
+
+                        echo '<a href="'.$item->url.'">';
+                          echo $item->title;
+                        echo '</a>';
+                       
+                      echo '</li>';
+                  }
+              }
+          }
+          ?>
+      </ul>
+
+      <?php 
+
+    }
+/*
+* Registerted custom menus
+*/
+
+
+
+/*
+* Template hierarchy
+*/
+Category:
+archive.php 
+archive-{post_type}.php 
+
+category-slug.php
+category-ID.php
+category.php
+
+taxonomy-{taxonomy}-{term}.php
+taxonomy-{taxonomy}.php
+tag-{slug}.php
+tag-{id}.php
+category-{slug}.php
+category-{ID}.php
+
+/*
+* Template hierarchy
+*/
+
+
 ?>
 
 
@@ -1925,3 +2143,18 @@ function wpse_30331_manipulate_views( $what, $views )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+<?php $image = wp_get_attachment_image_src( get_post_thumbnail_id( $loop->post->ID ), 'single-post-thumbnail' );?>
+
+    <img src="<?php  echo $image[0]; ?>" data-id="<?php echo $loop->post->ID; ?>">
