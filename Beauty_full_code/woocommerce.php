@@ -1,5 +1,294 @@
 <?php
 
+
+/*
+* Disable password strength
+*/
+//https://rudrastyh.com/woocommerce/password-strength-meter.html
+add_action( 'wp_enqueue_scripts', 'misha_deactivate_pass_strength_meter', 10 );
+function misha_deactivate_pass_strength_meter() {
+ 
+    wp_dequeue_script( 'wc-password-strength-meter' );
+ 
+}
+/*
+* Disable password strength
+*/
+
+
+
+/*
+* Add custom fields woo registration form
+*/
+function wooc_extra_register_fields() {?>
+    <p class="form-row form-row-wide" id="woocommerce_my_account_page_checkbox_field" data-priority="">
+        <input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="woocommerce_my_account_page_checkbox" id="woocommerce_my_account_page_checkbox" value="1">
+        <label class="woocommerce-form__label woocommerce-form__label-for-checkbox inline"><span><?php esc_html_e('Register as wholesaler', 'woocommerce'); ?></span></label>
+    </p>
+    <?php
+}
+add_action( 'woocommerce_register_form', 'wooc_extra_register_fields', 5 );
+
+function wooc_save_extra_register_fields($customer_id) {
+   if ( isset( $_POST['woocommerce_my_account_page_checkbox'] ) ) {
+       update_user_meta( $customer_id, 'woocommerce_my_account_page_checkbox', sanitize_text_field( $_POST['woocommerce_my_account_page_checkbox'] ) );
+       wp_update_user( array ('ID' => $customer_id, 'role' => 'wholesale_customer') );
+   }
+}
+add_action( 'woocommerce_created_customer', 'wooc_save_extra_register_fields' ); 
+/*
+* Add custom fields woo registration form
+*/
+
+
+
+
+/*
+* Change Order Status After place order from checkout page
+*/
+//https://stackoverflow.com/questions/45985488/set-woocommerce-order-status-when-order-is-created-from-processing-to-pending
+add_action( 'woocommerce_thankyou', 'woocommerce_thankyou_change_order_status', 10, 1 );
+function woocommerce_thankyou_change_order_status( $order_id ){
+    if( ! $order_id ) return;
+
+    $order = wc_get_order( $order_id );
+
+    if( $order->get_status() == 'processing' )
+        $order->update_status( 'pending' );
+}
+/*
+* Change Order Status After place order from checkout page
+*/
+
+
+/*
+* Change menu order on my account page.
+*/
+add_filter( 'woocommerce_account_menu_items', 'add_my_menu_items', 99, 1 );
+
+function add_my_menu_items( $items ) {
+    $my_items = array(
+        '2nd-item' => __( '2nd Item', 'my_plugin' ),
+    );
+
+    $my_items = array_slice( $items, 0, 5, true ) + $my_items + array_slice( $items, 5, count( $items ), true );
+
+    return $my_items;
+}
+/*
+* Change menu order on my account page.
+*/
+
+
+
+/*
+* Woocommerce Pages
+*/
+//https://docs.woocommerce.com/document/conditional-tags/
+
+//Main shop page
+is_shop()
+
+//Product category page
+is_product_category()
+
+//Product tag page
+is_product_tag()
+
+//Single product page
+is_product()
+
+//Cart page
+is_cart()
+
+//Checkout page
+is_checkout()
+
+
+///////user
+if (is_user_logged_in()) {
+
+    <a href="<?php echo wc_logout_url( wc_get_page_permalink( 'myaccount' ) );?>">Logout</a>
+
+
+}else{
+    <a href="<?php echo home_url();?>/my-account">Customer Login</a>
+    <a href="<?php echo home_url();?>/my-account/#register">Register</a>
+ }
+///////////user
+
+
+/*
+* Woocommerce Pages
+*/
+
+
+
+
+
+
+/*
+*
+*/
+$user_id = wc_create_new_customer( $user_email, $user_name, $random_password, $args );
+/*
+*
+*/
+
+explode(delimiter, string)
+
+/*
+* Update mini cart
+*/
+?>
+<script type="text/javascript">
+function refresh_fragments() {
+    console.log('fragments refreshed!');
+    $( document.body ).trigger( 'wc_fragment_refresh' );
+}
+
+refresh_fragments();
+setInterval(refresh_fragments, 60000);
+</script>
+<?php
+/*
+* Update mini cart
+*/
+
+/*
+* Term and condition chnage text 
+*/
+function custom_woocommerce_get_terms_and_conditions_checkbox_text($text){
+
+    $newtext = "I've read and accept the";
+    
+    $link = '<a href="https://www.dieseltruckpartsdirect.com/sandbox2/terms/" class="woocommerce-terms-and-conditions-link woocommerce-terms-and-conditions-link--closed" target="_blank">terms and conditions</a>';
+    $link2 = '<a href="https://www.dieseltruckpartsdirect.com/sandbox2/terms/" target="_blank">terms and conditions</a>';
+    return $newtext." ".$link2;
+
+}
+add_filter( 'woocommerce_get_terms_and_conditions_checkbox_text', 'custom_woocommerce_get_terms_and_conditions_checkbox_text', 1, 1);
+/*
+* Term and condition chnage text 
+*/
+
+
+/*
+*  Add class 
+*/ 
+add_filter( 'product_cat_class', 'filter_product_cat_class', 10, 3 );
+function filter_product_cat_class( $classes, $class, $category ){
+    // Only on shop page
+    if( is_shop() )
+        $classes[] = 'mu_custom_class1';
+
+    return $classes;
+}
+
+
+add_filter( 'post_class', 'filter_product_post_class', 10, 3 );
+function filter_product_post_class( $classes, $class, $product_id ){
+    // Only on shop page
+    if( is_shop() )
+        $classes[] = 'mu_custom_class2';
+
+    return $classes;
+}
+/*
+*  Add class 
+*/ 
+
+
+/*
+*  Get product list template
+*/ 
+echo '<div class="row">';
+    $args = array(
+        'post_type' => 'product',
+        'posts_per_page' => 5
+        );
+    $loop = new WP_Query( $args );
+    if ( $loop->have_posts() ) {
+        while ( $loop->have_posts() ) : $loop->the_post();
+            wc_get_template_part( 'content', 'product' );
+        endwhile;
+    } else {
+        echo __( 'No products found' );
+    }
+    wp_reset_postdata();
+echo '</div>';
+/*
+*  Get product list template
+*/ 
+
+
+
+
+/*
+* custom dropdown filter for shop page
+*/
+function add_query_vars_filter( $vars ){
+    $vars[] = 'myAttr';
+    return $vars;
+}
+add_action( 'query_vars', 'add_query_vars_filter' );
+
+
+function filter_pre_get_posts( $wp_query ) {
+    if (!is_archive() || !$wp_query->is_main_query() ) {
+        return;
+    }
+
+    $myAttr = get_query_var('myAttr');
+    if (isSet($myAttr ) && !empty($myAttr )) {
+        $wp_query->set('tax_query', array(
+            array(
+                'taxonomy' => 'product_cat',
+                'field' => 'term_id',
+                'terms' => $myAttr ,
+                'include_children' => true,
+                'operator' => 'IN'
+            )
+        ));
+    }
+}
+add_action('pre_get_posts', 'filter_pre_get_posts' );
+
+
+add_action( 'woocommerce_before_shop_loop', 'ps_selectbox', 25 );
+function ps_selectbox() {
+    $per_page = filter_input(INPUT_GET, 'myAttr', FILTER_SANITIZE_NUMBER_INT);     
+    echo '<div class="woocommerce-myAttr">';
+    echo '<span>Per Page: </span>';
+    echo '<select onchange="if (this.value) window.location.href=this.value">'; 
+    echo "<option ".selected( $per_page, $value )." value='?myAttr=$value'>--select--</option>";  
+    $orderby_options = array(
+        '67' => '67',
+        '108' => '108'
+    );
+    foreach( $orderby_options as $value => $label ) {
+        echo "<option ".selected( $per_page, $value )." value='?myAttr=$value'>$label</option>";
+    }
+    echo '</select>';
+    echo '</div>';
+}
+
+
+/*
+* custom dropdown filter for shop page
+*/
+
+
+/*
+* Get category id
+*/
+$category = get_queried_object();
+$category->term_id
+
+/*
+* Get category id
+*/
+
 /*
 * add custom fields checkout page
 */
@@ -226,8 +515,11 @@ echo get_permalink( wc_get_page_id( 'checkout' ) );
 * woocomerce page url
 */
 
+!empty(var)
 
-
+foreach ($variable as $key => $value) {
+  # code...
+}
 
 /*
 *  Remove the product description Title
@@ -391,6 +683,7 @@ function wpa83367_price_html( $price, $product ){
   </div>
   
 </div>
+
 
 <style type="text/css">
     .cus-modal-content{
@@ -687,6 +980,18 @@ function wpse_30331_manipulate_views( $what, $views )
 /*
 * Add custom tab my account page
 */
+/**
+ * @snippet       WooCommerce Add New Tab @ My Account
+ * @how-to        Watch tutorial @ https://businessbloomer.com/?p=19055
+ * @author        Rodolfo Melogli
+ * @compatible    WooCommerce 3.5.7
+ * @donate $9     https://businessbloomer.com/bloomer-armada/
+ */
+  
+// ------------------
+// 1. Register new endpoint to use for My Account page
+// Note: Resave Permalinks or it will give 404 error
+  
 function bbloomer_add_premium_support_endpoint() {
     add_rewrite_endpoint( 'premium-support', EP_ROOT | EP_PAGES );
 }
@@ -725,6 +1030,30 @@ echo do_shortcode( ' /* your shortcode here */ ' );
 }
   
 add_action( 'woocommerce_account_premium-support_endpoint', 'bbloomer_premium_support_content' );
+// Note: add_action must follow 'woocommerce_account_{your-endpoint-slug}_endpoint' format
+
+
+
+
+
+
+
+
+
+
+function bbloomer_add_premium_support_link_my_account( $items ) {
+   /* $items['premium-support-moodle'] = 'My Courses';
+    return $items;*/
+    
+     $my_items = array(
+        'premium-support-moodle' => __( 'My Courses', 'my_plugin' ),
+    );
+
+    $my_items = array_slice( $items, 0, 6, true ) + $my_items + array_slice( $items, 6, count( $items ), true );
+
+    return $my_items;
+}
+add_filter( 'woocommerce_account_menu_items', 'bbloomer_add_premium_support_link_my_account', 20);
 /*
 * Add custom tab my account page
 */
@@ -733,3 +1062,143 @@ add_action( 'woocommerce_account_premium-support_endpoint', 'bbloomer_premium_su
 ?>
 
 
+<?php
+/*
+* Set order price
+*/
+add_action('init', 'cust_fun');
+function cust_fun(){
+    echo '<h1>PPPPPPPPPPPPPP</h1>';
+    
+    $order_id = 77399; // Static order Id (can be removed to get a dynamic order ID from $order_id variable)
+
+    $order = wc_get_order( $order_id ); // The WC_Order object instance
+
+    // Loop through Order items ("line_item" type)
+    foreach( $order->get_items() as $item_id => $item )
+    {
+
+
+        //echo $item->get_order_id(); echo '<br>';
+        
+        //echo $item->get_product_id(); 
+
+
+        $wholesale_customer_wholesale_price = 50; // A static replacement product price
+        $product_quantity = (int) $item->get_quantity(); // product Quantity
+
+        // The new line item price
+        $new_line_item_price = $wholesale_customer_wholesale_price * $product_quantity;
+
+        // Set the new price
+        $item->set_subtotal( $new_line_item_price ); 
+        $item->set_total( $new_line_item_price );
+
+        // Make new taxes calculations
+        $item->calculate_taxes();
+
+        $item->save(); // Save line item data
+    }
+    // Make the calculations  for the order
+    $order->calculate_totals();
+
+    $order->save(); // Save and sync the data
+
+
+
+
+}
+
+
+add_action('init', 'cust_fun');
+function cust_fun(){
+  
+    $wholesale_customer_wholesale_price = get_post_meta( 77392 , 'wholesale_customer_wholesale_price', true ); 
+  
+    if($wholesale_customer_wholesale_price){
+        
+        echo "==>".$wholesale_customer_wholesale_price;
+         
+    }else{
+         echo 'no price set';
+    }
+}
+/*
+* Set order price
+*/
+?>
+
+
+<?php
+/*
+* not in use Set order price
+*/
+add_action( 'woocommerce_add_order_item_meta', 'custom_add_order_item_meta', 20, 3 );
+function custom_add_order_item_meta( $item_id, $values, $cart_item_key ) {
+    
+    
+    // Get a product custom field value
+    //$custom_field_value = get_post_meta( $values['data']->get_id(), '_meta_key', true );
+    
+    /**/
+     $or_id = get_custom_order_id();
+    
+     mail("gaurav.clagtech@gmail.com","My subject bb", $or_id);
+    
+    
+        /*global $post;
+        $order_id = $post->ID;*/
+        
+        $order_id = 77407;
+    
+    
+        $order = wc_get_order($order_id); // The WC_Order object instance
+        foreach( $order->get_items() as $item_id => $item ){
+            
+            //echo $item->get_order_id(); echo '<br>';
+            
+            //echo $item->get_product_id(); 
+            
+            //$wholesale_customer_wholesale_price = get_post_meta( $item->get_product_id() , 'wholesale_customer_wholesale_price', true ); 
+            
+             $wholesale_customer_wholesale_price = 10005;
+            
+            // A static replacement product price
+            $product_quantity = (int) $item->get_quantity(); // product Quantity
+    
+            // The new line item price
+            $new_line_item_price = $wholesale_customer_wholesale_price * $product_quantity;
+    
+            // Set the new price
+            $item->set_subtotal( $new_line_item_price ); 
+            $item->set_total( $new_line_item_price );
+    
+            // Make new taxes calculations
+            $item->calculate_taxes();
+    
+            $item->save(); // Save line item data
+                
+            
+        }
+        
+        // Make the calculations  for the order
+        $order->calculate_totals();
+
+        $order->save(); // Save and sync the data
+        /**/
+
+ 
+     
+
+    
+}
+
+
+function get_custom_order_id(){
+    $ppp = get_the_ID();
+    return 'uuuuuuuuuuuuuuuuuuuuu'.$ppp;
+}
+/*
+* not in use Set order price
+*/
+?>
