@@ -1,4 +1,511 @@
 <?php
+/*Add custom status*/
+// New order status AFTER woo 2.2
+add_action( 'init', 'custom_core_register_my_new_order_statuses' );
+
+function custom_core_register_my_new_order_statuses() {
+
+    register_post_status( 'wc-paypal-sent', array(
+        'label'                     => _x( 'Paypal Invoice Sent', 'Order status', 'woocommerce' ),
+        'public'                    => true,
+        'exclude_from_search'       => false,
+        'show_in_admin_all_list'    => true,
+        'show_in_admin_status_list' => true,
+        'label_count'               => _n_noop( 'Paypal Invoice Sent <span class="count">(%s)</span>', 'Paypal Invoice Sent<span class="count">(%s)</span>', 'woocommerce' )
+    ) );
+}
+
+add_filter( 'wc_order_statuses', 'custom_core_my_new_wc_order_statuses' );
+
+// Register in wc_order_statuses.
+function custom_core_my_new_wc_order_statuses( $order_statuses ) {
+
+
+
+    $order_statuses['wc-paypal-sent'] = _x( 'Paypal Invoice Sent', 'Order status', 'woocommerce' );
+
+    
+
+    return $order_statuses;
+}
+/*Add custom status*/
+
+
+
+
+/**
+ * Hide category product count in product archives
+ */
+add_filter( 'woocommerce_subcategory_count_html', '__return_false' );
+
+
+
+/*change category image*/
+remove_action('woocommerce_before_subcategory_title', 'woocommerce_subcategory_thumbnail', 10);
+add_action('woocommerce_before_subcategory_title', 'category_thunbnail_woocommerce_subcategory_thumbnail', 10, 1);
+function category_thunbnail_woocommerce_subcategory_thumbnail($category){
+    
+
+    $thumbnail_id = get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
+    
+    if($thumbnail_id){
+        $image = wp_get_attachment_url( $thumbnail_id ); 
+        echo "<img src='{$image}' alt='' width='762' height='365' />";
+    }else{
+        
+         $image = wp_get_attachment_url( 37070 ); 
+        echo "<img src='{$image}' alt='' width='762' height='365' />";
+        
+        //37069 37070
+    }
+    
+    
+    
+}
+/*change category image*/
+
+
+
+
+/*
+* Add order notes
+*/
+// If you don't have the WC_Order object (from a dynamic $order_id)
+$order = wc_get_order(  $order_id );
+
+// The text for the note
+$note = __("This is my note's text…");
+
+// Add the note
+$order->add_order_note( $note );
+/*
+* Add order notes
+*/
+
+
+
+/*
+* woocommerce aler message
+*/
+add_filter('wc_add_to_cart_message', 'handler_function_name', 10, 2);
+function handler_function_name($message, $product_id) {
+    return "Thank you for adding product" . $product_id;
+}
+
+wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
+/*
+* woocommerce aler message
+*/
+
+
+
+
+/*
+* Send mail using woocommerce header and footer
+*/
+$wc_emails = WC_Emails::instance();
+
+$subject = 'Test';
+
+$message = 'Hello world';
+
+$from_name = 'Alvin';
+
+$from_email = 'alvin.quickfix@gmail.com';
+
+$to = 'lores.quickfix@gmail.com ';
+
+$headers = _construct_email_header( $from_name , $from_email );
+
+$message = $wc_emails->wrap_message( $subject, $message );
+
+$wc_emails->send( $to , $subject , $message , $headers );
+
+
+function _construct_email_header ( $from_name , $from_email , $cc = array() , $bcc = array() ) {
+
+    $headers[] = 'From: ' . $from_name  . ' <' . $from_email . '>';
+
+    if ( is_array( $cc ) )
+        foreach ( $cc as $c )
+            $headers[] = 'Cc: ' . $c;
+
+    if ( is_array( $bcc ) )
+        foreach ( $bcc as $bc )
+            $headers[] = 'Bcc: ' . $bc;
+
+    $headers[] = 'Content-Type: text/html; charset=UTF-8';
+
+    return $headers;
+
+}
+/*
+* Send mail using woocommerce header and footer
+*/
+
+
+/*
+* Set mail using woocommerce templat
+*/
+ function get_custom_email_html( $order, $heading = false, $mailer ) {
+ 
+    $template = 'emails/customer-on-hold-order.php';
+ 
+    return wc_get_template_html( $template, array(
+        'order'         => $order,
+        'email_heading' => $heading,
+        'sent_to_admin' => false,
+        'plain_text'    => false,
+        'email'         => $mailer
+    ) );
+ 
+}
+
+// load the mailer class
+$mailer = WC()->mailer();
+$order = new WC_Order( $order_id );
+ 
+//format the email
+$recipient = $order->get_billing_email();
+$subject = __("Your Prosource Diesel order has been received!", 'theme_name');
+$content = get_custom_email_html( $order, $subject, $mailer );
+$headers = "Content-Type: text/html\r\n";
+ 
+//send the email through wordpress
+$mailer->send( $recipient, $subject, $content, $headers );  
+/*
+* Set mail using woocommerce templat
+*/
+
+
+
+
+/*
+* Get Create coupom and check
+*/
+function auto_create_coupon($count, $coupon_code, $amount, $discount_type, $usage_limit, $usage_limit_per_user){
+
+
+  for ($i=1; $i <= $count; $i++) { 
+
+    echo $i; echo "<br>";
+              
+    $coupon = array(
+      'post_title' => $coupon_code.'-'.$i,
+      'post_content' => '',
+      'post_status' => 'publish',
+      'post_author' => 1,
+      'post_type'   => 'shop_coupon'
+    );
+              
+    $new_coupon_id = wp_insert_post( $coupon );
+              
+    // Add meta
+    update_post_meta( $new_coupon_id, 'discount_type', $discount_type );
+    update_post_meta( $new_coupon_id, 'coupon_amount', $amount );
+
+    update_post_meta( $new_coupon_id, 'individual_use', 'no' );
+    update_post_meta( $new_coupon_id, 'product_ids', '' );
+    update_post_meta( $new_coupon_id, 'exclude_product_ids', '' );
+
+    update_post_meta( $new_coupon_id, 'usage_limit', $usage_limit );
+    update_post_meta( $new_coupon_id, 'usage_limit_per_user', $usage_limit_per_user );
+
+
+    update_post_meta( $new_coupon_id, 'expiry_date',  '' );
+    update_post_meta( $new_coupon_id, 'apply_before_tax', 'yes' );
+    update_post_meta( $new_coupon_id, 'free_shipping', 'no' );
+
+  }
+
+
+}
+
+
+$count = 3;
+$coupon_code = 'Instant'; // Code
+$amount = '10'; // Amount
+$discount_type = 'fixed_cart'; // Type: fixed_cart, percent, fixed_product, percent_product
+$usage_limit = 1;
+$usage_limit_per_user = 1;
+
+
+auto_create_coupon($count, $coupon_code, $amount, $discount_type, $usage_limit, $usage_limit_per_user);
+
+
+
+
+/*
+* Get Create coupom and check
+*/
+
+
+/*
+* Start: Auto apply coupon ajax function
+*/
+add_action( 'wp_ajax_auto_apply_coupon_aj', 'auto_apply_coupon_aj_fun');
+add_action( 'wp_ajax_nopriv_auto_apply_coupon_aj', 'auto_apply_coupon_aj_fun');
+function auto_apply_coupon_aj_fun(){
+    
+    WC()->session->set( 'auto_apply_coupon_code_check', '' );
+    WC()->session->set( 'auto_apply_coupon_code', '' );
+
+    $email_id = $_POST['email_id'];
+    
+    $args = array(
+      'posts_per_page'   =>  1,
+        'orderby'    => 'rand',
+        'order'      => 'DESC',
+      'post_type'        => 'shop_coupon',
+      'post_status'      => 'publish',
+      'meta_query'    => array(
+          'relation'      => 'AND',
+          array(
+              'key'       => 'usage_limit',
+              'value'     => '1',
+              'compare'   => '=',
+          ),
+          array(
+              'key'       => 'usage_limit_per_user',
+              'value'     => '1',
+              'compare'   => '=',
+          ),
+          array(
+              'key'       => 'usage_count',
+              'value'     => '0',
+              'compare'   => '=',
+          ),
+          array(
+              'key'       => 'custom_auto_coupon_title',
+              'value'     => 'INSTANT',
+              'compare'   => '=',
+          )
+      )
+    );
+    
+    $query = new WP_Query( $args );
+    
+    $c_arr = array();
+    if($query->have_posts()){
+        while( $query->have_posts() ) {  $query->the_post();
+            $coupon_code_title = get_the_title();
+            $c_arr = $coupon_code_title;
+        }
+        wp_reset_postdata();
+    }
+    
+    
+    global $wpdb;
+    $email_exists_check = email_exists( $email_id );
+    if($email_exists_check){
+        $userbyemail = get_user_by('email', $email_id);
+        $query =  'SELECT * FROM wp_postmeta WHERE meta_key = "_used_by" AND meta_value = "'.$userbyemail->ID.'"';
+        $results = $wpdb->get_results( $query );
+        
+    }else{
+        $query =  'SELECT * FROM wp_postmeta WHERE meta_key = "_used_by" AND meta_value = "'.$email_id.'"';
+        $results = $wpdb->get_results( $query );
+    }
+    
+    if(sizeof($results) == 0){
+        
+        $myJSON = json_encode(array($c_arr)); 
+        echo $myJSON;
+        $_SESSION['auto_apply_coupon_code_check'] = 1;
+        $_SESSION['auto_apply_coupon_code'] = $c_arr;
+        
+    }else{
+        $myJSON = json_encode(array('this_email_used')); 
+        echo $myJSON;
+    }
+    
+    /*WC()->session->set( 'auto_apply_coupon_code_check', '1' );
+    WC()->session->set( 'auto_apply_coupon_code', $c_arr );*/
+    
+    die();
+}
+
+add_action( 'woocommerce_before_cart', 'bbloomer_apply_matched_coupons' );
+add_action( 'woocommerce_before_checkout_form', 'bbloomer_apply_matched_coupons', 25 );
+
+function bbloomer_apply_matched_coupons() {
+
+    /*if (WC()->session->get( 'auto_apply_coupon_code_check')) {
+        
+        $coupon_code = WC()->session->get( 'auto_apply_coupon_code'); 
+ 
+        if ( WC()->cart->has_discount( $coupon_code ) ) return;
+        WC()->cart->add_discount( $coupon_code );
+        wc_print_notices();
+        
+        WC()->session->set( 'auto_apply_coupon_code_check', '' );
+        WC()->session->set( 'auto_apply_coupon_code', '' );
+    }*/
+    
+    
+    if ( $_SESSION['auto_apply_coupon_code_check'] ) {
+        
+        $coupon_code = $_SESSION['auto_apply_coupon_code']; 
+ 
+        if ( WC()->cart->has_discount( $coupon_code ) ) return;
+        WC()->cart->add_discount( $coupon_code );
+        wc_print_notices();
+        
+        $_SESSION['auto_apply_coupon_code_check'] = '';
+        $_SESSION['auto_apply_coupon_code'] = '';
+    }
+
+}
+
+
+function tatwerat_startSession() {
+    if(!session_id()) {
+        session_start();
+    }
+}
+
+add_action('init', 'tatwerat_startSession', 1);
+/*
+* End: Auto apply coupon ajax function
+*/
+
+
+
+
+
+
+/*
+* Get Country and state
+*/
+ $countries   = $countries_obj->__get('countries');
+    echo '<div id="my_custom_countries_field"><h2>' . __('Countries') . '</h2>';
+
+    woocommerce_form_field('my_country_field', array(
+    'type'       => 'select',
+    'class'      => array( 'chzn-drop' ),
+    'label'      => __('Select a country'),
+    'placeholder'    => __('Enter something'),
+    'options'    => $countries
+    )
+    );
+    echo '</div>';
+
+
+    $default_county_states = $countries_obj->get_states( 'US' );
+
+    echo '<div id="my_custom_state_field"><h2>' . __('States') . '</h2>';
+
+    woocommerce_form_field('my_state_field', array(
+    'type'       => 'select',
+    'class'      => array( 'chzn-drop' ),
+    'label'      => __('Select a state'),
+    'placeholder'    => __('Enter something'),
+    'options'    => $default_county_states
+    )
+    );
+    echo '</div>';
+
+/*
+* Get Country and state
+*/
+
+
+
+    
+/*
+* Get category tree
+*/
+/*$args = array(
+    'hide_empty'         => 0,
+    'echo'               => 1,
+    'taxonomy'           => 'product_cat',
+    'hierarchical'  =>1,
+    'show_count' => 1,
+
+);
+
+function add_class_wp_list_categories($wp_list_categories) {
+        $pattern = '/<li class="/is';
+        $replacement = '<li class="first ';
+        return preg_replace($pattern, $replacement, $wp_list_categories);
+}
+add_filter('wp_list_categories','add_class_wp_list_categories');
+
+echo wp_list_categories( $args );*/
+
+
+function get_sub_category_cus_fun($term_id){
+    
+    $args_cat = array(
+       'hierarchical' => 1,
+       'show_option_none' => '',
+       'hide_empty' => 0,
+       'parent' => $term_id,
+       'taxonomy' => 'product_cat'
+    );
+    $categories = get_categories($args_cat);
+    
+    $html = "";
+    
+    if(count($categories)!=0){
+        
+        $html .= '<li>';
+        
+            $html = '<ul class="child">';
+        
+            foreach($categories as $categorie){
+                
+                $html .='<li>';
+                   $html .= $categorie->name; 
+                    $html .= get_sub_category_cus_fun($categorie->term_id);
+                $html .='</li>';
+                
+            }
+            
+            $html .= '</ul>';
+        
+        $html .= '</li>';
+        
+    }
+    
+    return $html;
+}
+
+
+function get_main_category_cus_fun($args_cat){
+    
+    $categories = get_categories($args_cat);
+
+    $html = "";
+     
+    foreach($categories as $categorie){
+        
+        $html .= '<ul class="parent">';
+            $html .= $categorie->name;
+            $html .= get_sub_category_cus_fun($categorie->term_id);
+        $html .= '</ul>';
+    }
+    
+    return $html;
+    
+}
+
+
+$args_cat = array(
+       'hierarchical' => 1,
+       'show_option_none' => '',
+       'hide_empty' => 0,
+       'parent' => 0,
+       'taxonomy' => 'product_cat',
+       //'orderby' => 'term_id',
+       //'order'   => 'DESC'
+);
+
+echo  get_main_category_cus_fun($args_cat);
+/*
+* Get category tree
+*/
+
 
 
 /*
@@ -20,6 +527,8 @@ function misha_deactivate_pass_strength_meter() {
 /*
 * Add custom fields woo registration form
 */
+https://www.cloudways.com/blog/add-woocommerce-registration-form-fields/
+
 function wooc_extra_register_fields() {?>
     <p class="form-row form-row-wide" id="woocommerce_my_account_page_checkbox_field" data-priority="">
         <input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="woocommerce_my_account_page_checkbox" id="woocommerce_my_account_page_checkbox" value="1">
@@ -36,6 +545,26 @@ function wooc_save_extra_register_fields($customer_id) {
    }
 }
 add_action( 'woocommerce_created_customer', 'wooc_save_extra_register_fields' ); 
+
+
+
+function wooc_extra_register_fields() {?>
+       <p class="form-row form-row-wide">
+       <label for="reg_billing_phone"><?php _e( 'Phone', 'woocommerce' ); ?></label>
+       <input type="text" class="input-text" name="billing_phone" id="reg_billing_phone" value="<?php esc_attr_e( $_POST['billing_phone'] ); ?>" />
+       </p>
+       <p class="form-row form-row-first">
+       <label for="reg_billing_first_name"><?php _e( 'First name', 'woocommerce' ); ?><span class="required">*</span></label>
+       <input type="text" class="input-text" name="billing_first_name" id="reg_billing_first_name" value="<?php if ( ! empty( $_POST['billing_first_name'] ) ) esc_attr_e( $_POST['billing_first_name'] ); ?>" />
+       </p>
+       <p class="form-row form-row-last">
+       <label for="reg_billing_last_name"><?php _e( 'Last name', 'woocommerce' ); ?><span class="required">*</span></label>
+       <input type="text" class="input-text" name="billing_last_name" id="reg_billing_last_name" value="<?php if ( ! empty( $_POST['billing_last_name'] ) ) esc_attr_e( $_POST['billing_last_name'] ); ?>" />
+       </p>
+       <div class="clear"></div>
+       <?php
+ }
+ add_action( 'woocommerce_register_form_start', 'wooc_extra_register_fields' );
 /*
 * Add custom fields woo registration form
 */
@@ -1201,4 +1730,115 @@ function get_custom_order_id(){
 /*
 * not in use Set order price
 */
+?>
+
+
+
+
+<?php
+    $order = new WC_Order( $order_id );
+
+    $billing_address = $order->get_formatted_billing_address(); // for printing or displaying on web page
+    $shipping_address = $order->get_formatted_shipping_address();
+    $email = $order->billing_email;
+    $name = $order->billing_first_name.' '.$order->billing_last_name;
+    $billing_phone = $order->billing_phone;
+    $date = date('M d, Y');
+
+    $data   = '';
+    $data   .= "<table border='0' cellpadding='0' cellspacing='0' width='600'><tbody><tr>
+    <td valign='top' style='background-color:#fdfdfd'>
+    <table border='0' cellpadding='20' cellspacing='0' width='100%'>
+    <tbody>
+    <tr>
+    <td valign='top' style='padding:48px'>
+    <div style='color:#737373;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left'>
+    <span>
+    <p style='margin:0 0 16px'>
+    You have received an order from $name. The order is as follows:
+    </p>
+    </span>
+    <h2 style='color:#557da1;display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:18px;font-weight:bold;line-height:130%;margin:16px 0 8px;text-align:left'>
+    Order # $order_id ( $date )
+    </h2>
+    <div>
+    <div>";
+    if( sizeof( $order->get_items() ) > 0 ) {           
+        $data   .=    "<table cellspacing='0' cellpadding='6' style='width:100%;border:1px solid #eee' border='1'>
+        <thead>
+        <tr>
+        <th scope='col' style='text-align:left;border:1px solid #eee;padding:12px'>
+        Product
+        </th>
+        <th scope='col' style='text-align:left;border:1px solid #eee;padding:12px'>
+        Quantity
+        </th>
+        <th scope='col' style='text-align:left;border:1px solid #eee;padding:12px'>
+        Price
+        </th>
+        </tr>
+        </thead>
+        <tbody>";
+        $data   .= $order->email_order_items_table( false, true );            
+        $data   .=  "</tbody><tfoot>";
+        if ( $totals = $order->get_order_item_totals() ) {
+            $i = 0;
+            foreach ( $totals as $total ) {
+            $i++;
+            $label =    $total['label'];
+            $value = $total['value'];
+            $data .= "<tr>
+            <th scope='row' colspan='2' style='text-align:left; border: 1px solid #eee;'>$label</th>
+            <td style='text-align:left; border: 1px solid #eee;'>$value</td>
+            </tr>";
+            }
+        }
+        $data .= "</tfoot></table>";
+    }
+
+    $data .=        
+    "<span>
+    <p style='margin:0 0 16px'><strong>Reference No. :</strong>$net_30_ref_no</p>
+
+    <h2 style='color:#557da1;display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:18px;font-weight:bold;line-height:130%;margin:16px 0 8px;text-align:left'>
+    Customer details
+    </h2>
+    <p style='margin:0 0 16px'>
+    <strong>Email:</strong>
+    <a href='mailto:' target='_blank'>
+    $email
+    </a>
+    </p>
+    <p style='margin:0 0 16px'>
+    <strong>Tel:</strong>
+    $billing_phone
+    </p>
+    <table cellspacing='0' cellpadding='0' style='width:100%;vertical-align:top' border='0'>
+    <tbody>
+    <tr>
+    <td valign='top' width='50%' style='padding:12px'>
+    <h3 style='color:#557da1;display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:16px;font-weight:bold;line-height:130%;margin:16px 0 8px;text-align:left'>Billing address</h3>
+    <p style='margin:0 0 16px'> $billing_address </p>
+    </td>
+    <td valign='top' width='50%' style='padding:12px'>
+    <h3 style='color:#557da1;display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:16px;font-weight:bold;line-height:130%;margin:16px 0 8px;text-align:left'>Shipping address</h3>
+    <p style='margin:0 0 16px'> $shipping_address </p>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </span>
+    </div>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>";
+
+    $mailer = WC()->mailer();
+    $subject = 'Net 30 Invoice';
+    $mailer->send( $email, $subject, $mailer->wrap_message( $subject, $data ), '', '' ); 
 ?>
