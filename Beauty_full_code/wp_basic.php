@@ -1,4 +1,135 @@
 <?php
+//https://mail.google.com/mail/u/0/#inbox/FMfcgxwBTsgTHFhfZFFNgHKBbBzWgLrL
+
+/**/
+-SSH
+ssh user_name@domain_name  -p 7822
+password
+
+pwd
+cd public_html
+cd sandbox
+
+
+ssh dieseltruck11@dieseltruckpartsdirect.com   -p 7822
+4BBP2ce5%Y
+/**/
+
+
+
+/*
+*  Stop auto plugin update
+*/
+function my_filter_plugin_updates( $value ) {
+   if( isset( $value->response['woocommerce-product-addons/woocommerce-product-addons.php'] ) ) {        
+      unset( $value->response['woocommerce-product-addons/woocommerce-product-addons.php'] );
+    }
+    return $value;
+ }
+add_filter( 'site_transient_update_plugins', 'my_filter_plugin_updates' );
+/*
+*  Stop auto plugin update
+*/
+
+
+
+/*
+* Upload image by url
+*/
+
+function crb_insert_attachment_from_url($url, $parent_post_id = null) {
+    if( !class_exists( 'WP_Http' ) )
+        include_once( ABSPATH . WPINC . '/class-http.php' );
+    $http = new WP_Http();
+    $response = $http->request( $url );
+
+    /*if( $response['response']['code'] != 200 ) {
+        return false;
+    }*/
+    
+    $upload = wp_upload_bits( basename($url), null, $response['body'] );
+    if( !empty( $upload['error'] ) ) {
+        return false;
+    }
+    $file_path = $upload['file'];
+    $file_name = basename( $file_path );
+    $file_type = wp_check_filetype( $file_name, null );
+    $attachment_title = sanitize_file_name( pathinfo( $file_name, PATHINFO_FILENAME ) );
+    $wp_upload_dir = wp_upload_dir();
+    $post_info = array(
+        'guid'           => $wp_upload_dir['url'] . '/' . $file_name,
+        'post_mime_type' => $file_type['type'],
+        'post_title'     => $attachment_title,
+        'post_content'   => '',
+        'post_status'    => 'inherit',
+    );
+    // Create the attachment
+    $attach_id = wp_insert_attachment( $post_info, $file_path, $parent_post_id );
+    // Include image.php
+    require_once( ABSPATH . 'wp-admin/includes/image.php' );
+    // Define attachment metadata
+    $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
+    // Assign metadata to attachment
+    wp_update_attachment_metadata( $attach_id,  $attach_data );
+    return $attach_id;
+}
+/*
+* Upload image by url
+*/
+
+
+/**/
+echo htmlspecialchars_decode($variations);
+/**/
+
+
+
+/**/
+function title_filter( $where, &$wp_query )
+{
+    global $wpdb;
+    if ( $search_term = $wp_query->get( 'search_prod_title' ) ) {
+        $where .= ' AND ' . $wpdb->posts . '.post_title LIKE \'%' . esc_sql( like_escape( $search_term ) ) . '%\'';
+    }
+    return $where;
+}
+
+$args = array(
+    'post_type' => 'product',
+    'posts_per_page' => $page_size,
+    'paged' => $page,
+    'search_prod_title' => $search_term,
+    'post_status' => 'publish',
+    'orderby'     => 'title', 
+    'order'       => 'ASC'
+);
+
+add_filter( 'posts_where', 'title_filter', 10, 2 );
+$wp_query = new WP_Query($args);
+remove_filter( 'posts_where', 'title_filter', 10, 2 );
+return $wp_query;
+/**/
+
+
+/*
+* Open PDF
+*/
+$full_path = '00001-2019.pdf';
+$type  =  'inline'; //inline, attachment
+
+header( 'Content-type: application/pdf' );
+header( 'Content-Disposition: ' . $type . '; filename="' . basename( $full_path ) . '"' );
+header( 'Content-Transfer-Encoding: binary' );
+header( 'Content-Length: ' . filesize( $full_path ) );
+header( 'Accept-Ranges: bytes' );
+
+readfile( $full_path );
+die();
+/*
+* Open PDF
+*/
+
+
 /*
 * wp search add post type
 */
@@ -362,6 +493,8 @@ function allow_new_role_uploads() {
 }
 
 add_action('admin_init','psp_add_role_caps',999);
+
+
 function psp_add_role_caps() {
 
     // Add the roles you'd like to administer the custom post types
@@ -764,6 +897,27 @@ Class null_custom_menu_widget extends WP_Widget {
 
 
 /*
+* Add dashboard widget
+*/
+add_action('wp_dashboard_setup', 'my_custom_dashboard_widgets');
+  
+function my_custom_dashboard_widgets() {
+global $wp_meta_boxes;
+ 
+wp_add_dashboard_widget('custom_help_widget', 'Theme Support', 'custom_dashboard_help');
+}
+ 
+function custom_dashboard_help() {
+echo '<p>Welcome to Custom Blog Theme! Need help? Contact the developer <a href="mailto:yourusername@gmail.com">here</a>. For WordPress Tutorials visit: <a href="https://www.wpbeginner.com" target="_blank">WPBeginner</a></p>';
+}
+/*
+* Add dashboard widget
+*/
+
+
+
+
+/*
 * Start:add shortcode
 */
 function acf_gallery_function($atts){
@@ -1153,6 +1307,32 @@ $args = array( //77392
     'date_query'     => array( 'after' => $search_date ),
 );
 
+
+/*$args = array(
+    'posts_per_page'   => 10,
+    'orderby'          => 'date',
+    'order'            => 'DESC',
+    'post_type'        => 'shop_order',
+    'post_status'      => 'any',
+    'meta_query'    => array(
+        array(
+            'key'       => 'wholesaler_payment_invoice_id',
+            'value'     => 'INV2-P6MN-QVHU-25SW-2LMU',
+            'compare'   => '=',
+        )
+    )
+);
+
+
+$query = new WP_Query( $args );
+
+echo "<pre>";
+print_r($query->posts);
+echo "</pre>";*/
+
+
+
+
 // The Query
 //$query = new WP_Query( $args );
 $post_query_1 = get_posts($args);
@@ -1194,7 +1374,50 @@ function chile_init_fun(){
     print_r($ppppp);
     echo "</pre>";
 
+
+
+    $args = array(
+    'posts_per_page'   => 10,
+    'orderby'          => 'date',
+    'order'            => 'DESC',
+    'post_type'        => 'post',
+    'post_status'      => 'publish'
+    );
+
+
+    $query = new WP_Query( $args );
+
+
+    if($query->have_posts()){
+
+        while( $query->have_posts() ) { 
+            $query->the_post();
+
+            get_the_ID(); 
+            get_the_title(); 
+            $image = get_post_thumbnail_id();
+
+
+            echo substr(strip_tags(get_the_content()),0,25)
+            get_the_excerpt();
+
+
+            $image_size = 'full'; // (thumbnail, medium, large, full or custom size)
+            $image_attributes_thumbnail = wp_get_attachment_image_src( $image, $image_size );
+
+
+
+        }
+
+        wp_reset_postdata();
+
+    }
+
+
 }
+
+[custom_get_posts_list_amp]
+
 /* 
 * End:Post argument
 */
@@ -2140,6 +2363,123 @@ category-{ID}.php
 
 
 
+<?php
+//Place order programmatically
+
+if (isset($_POST['isOrder']) && $_POST['isOrder'] == 1) {
+    $address = array(
+        'first_name' => $_POST['notes']['domain'],
+        'last_name'  => '',
+        'company'    => $_POST['customer']['company'],
+        'email'      => $_POST['customer']['email'],
+        'phone'      => $_POST['customer']['phone'],
+        'address_1'  => $_POST['customer']['address'],
+        'address_2'  => '', 
+        'city'       => $_POST['customer']['city'],
+        'state'      => '',
+        'postcode'   => $_POST['customer']['postalcode'],
+        'country'    => 'NL'
+    );
+
+    $order = wc_create_order();
+    foreach ($_POST['product_order'] as $productId => $productOrdered) :
+        $order->add_product( get_product( $productId ), 1 );
+    endforeach;
+
+    $order->set_address( $address, 'billing' );
+    $order->set_address( $address, 'shipping' );
+
+    $order->calculate_totals();
+
+    update_post_meta( $order->id, '_payment_method', 'ideal' );
+    update_post_meta( $order->id, '_payment_method_title', 'iDeal' );
+
+    // Store Order ID in session so it can be re-used after payment failure
+    WC()->session->order_awaiting_payment = $order->id;
+
+    // Process Payment
+    $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+    $result = $available_gateways[ 'ideal' ]->process_payment( $order->id );
+
+    // Redirect to success/confirmation/payment page
+    if ( $result['result'] == 'success' ) {
+
+        $result = apply_filters( 'woocommerce_payment_successful_result', $result, $order->id );
+
+        wp_redirect( $result['redirect'] );
+        exit;
+    }
+}
+?>
+
+
+<?php
+
+
+Cron job::
+
+wget https://funtimepartyhire.com.au/admin-panel/daily_status_mailer.php
+wget -q -O — http://yourwebsite.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1
+
+
+wget https://funtimepartyhire.com.au/mail_test.php
+wget https://funtimepartyhire.com.au/mail_test.php working
+
+/usr/bin/curl --user-agent DIESEL-CronRfrshToken https://www.dieseltruckpartsdirect.com/qb/OAuth_2/RefreshToken.php?k=843536d7-d62b-9c15-1ae5-57654324bbbad8
+
+
+?>
+
+
+<?php
+/*
+* Sent Net30 invoice mail with attachments
+*/
+function cusrom_send_mailer(){
+    
+    $attachments = array(WP_CONTENT_DIR . '/uploads/net30-pdf/Test-1.pdf');
+    
+    $to = "gaurav.clagtech@gmail.com";
+    $subject = "Test";
+    $message = "Testing! cron.php  55";
+    $headers = "From: miller.clagtech@gmail.com";;
+    
+    $result = wp_mail( $to, $subject, $message, $headers, $attachments );
+    
+    if($result)
+    {
+        echo "cron send";
+    }
+    else{
+        
+        echo "cron not send";
+    }
+}
+
+
+
+$to = "gaurav.clagtech@gmail.com";
+$subject = "Test";
+$txt = "Testing! cron.php  55";
+$headers = "From: miller.clagtech@gmail.com";;
+
+
+$result = mail($to,$subject,$txt,$headers);
+
+if($result)
+{
+    echo "cron send";
+}
+else{
+    echo "cron not send";
+}
+
+
+
+
+
+
+?>
 
 
 
@@ -2152,9 +2492,38 @@ category-{ID}.php
 
 
 
+wp-admin/includes/schema.php 
+capabilities
+
+Loop post
+wp-inculede/post.php
+wp-inculede/post-template.php
+wp-inculede/post-thumbnail.php
+
+Media
+wp-include/media.php
+wp-admin/js/custom-background.js:
+
+Style/script include
+wp-includes/script-loader.php:
+functions.wp-styles.php
+functions.wp-scripts.php
+
+style path:
+wp-includes/theme.php
+
+Add menu
+wp-admin/includes/plugin.php
 
 
+Meta 
 
-<?php $image = wp_get_attachment_image_src( get_post_thumbnail_id( $loop->post->ID ), 'single-post-thumbnail' );?>
+post and postmeta
 
-    <img src="<?php  echo $image[0]; ?>" data-id="<?php echo $loop->post->ID; ?>">
+terms and termmeta
+
+user and usermeta
+
+wp_woocommerce_order_items and wp_woocommerce_order_itemsmeta
+
+coments and comentmeta
