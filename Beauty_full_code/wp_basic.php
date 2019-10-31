@@ -16,6 +16,44 @@ ssh dieseltruck11@dieseltruckpartsdirect.com   -p 7822
 /**/
 
 
+/*
+* Replace URL
+*/
+function replace_text_wps($text){
+    $home_url = home_url();
+    $replace = array(
+        'http://www.prosportstickers.com' => $home_url //'http://66.117.14.108/~prosport',
+    );
+    $text = str_replace(array_keys($replace), $replace, $text);
+    return $text;
+}
+add_filter('the_content', 'replace_text_wps');
+add_filter('the_excerpt', 'replace_text_wps');
+/*
+* Replace URL
+*/
+
+
+
+/*
+* Nav menu
+*/
+$aventura_location_menu = 'top_nav';
+
+    if ( has_nav_menu($aventura_location_menu) ) :
+        wp_nav_menu( array(
+            'theme_location' => $aventura_location_menu,
+            'menu_class'     => 'nav navbar-nav collapse navbar-collapse tz-nav',
+            'menu_id'        => 'tz-navbar-collapse-scroll',
+            'container'      => '',
+            'items_wrap' => '%3$s'
+        ) ) ;
+    endif;
+/*
+* Nav menu
+*/
+
+
 
 /*
 *  Stop auto plugin update
@@ -1240,9 +1278,9 @@ add_action( 'admin_enqueue_scripts', 'rr_scripts' );
           });
 
          
-          jQuery('body').on('click', '.misha_remove_image_button', function(){
-          jQuery(this).hide().prev().val('').prev().addClass('button').html('Upload image');
-          return false;
+        jQuery('body').on('click', '.misha_remove_image_button', function(){
+            jQuery(this).hide().prev().val('').prev().addClass('button').html('Upload image');
+            return false;
         });
 
      });
