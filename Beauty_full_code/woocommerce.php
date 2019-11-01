@@ -1,4 +1,75 @@
 <?php
+
+
+/*
+* Woocommerce email template
+*/
+function sww_add_images_woocommerce_emails( $output, $order ) {
+  
+  // set a flag so we don't recursively call this filter
+  static $run = 0;
+  
+  // if we've already run this filter, bail out
+  if ( $run ) {
+    return $output;
+  }
+  
+  $args = array(
+    'show_image'    => true,
+    'image_size'    => array( 100, 100 ),
+  );
+  
+  // increment our flag so we don't run again
+  $run++;
+  
+  // if first run, give WooComm our updated table
+  return $order->email_order_items_table( $args );
+}
+add_filter( 'woocommerce_email_order_items_table', 'sww_add_images_woocommerce_emails', 100000, 2 );
+
+
+
+add_filter( 'woocommerce_order_item_name', 'display_product_title_as_link', 10, 2 );
+function display_product_title_as_link( $item_name, $item ) {
+    
+ 
+    $_product = wc_get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
+    
+    $count = sizeof($_product);
+    
+    if($count == 1){
+        return $item_name;
+    }
+    
+
+    $link = get_permalink( $_product->get_id() );
+
+    return '<a href="'. $link .'"  rel="nofollow">'. $item_name .'</a>';
+    
+}
+
+add_filter( 'woocommerce_order_item_thumbnail', 'custom_woocommerce_order_item_thumbnail', 10, 2 );
+function custom_woocommerce_order_item_thumbnail( $image, $item ) {
+
+    $_product = wc_get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
+
+    $link = get_permalink( $_product->get_id() );
+
+    $thumbnail_id = get_post_thumbnail_id($_product->get_id());
+
+    $image_attributes_thumbnail = wp_get_attachment_image_src( $thumbnail_id, 'medium' );
+
+     $img = '<img width="100" height="100" src="'.$image_attributes_thumbnail[0].'">';
+    
+    return '<a href="'. $link .'"  rel="nofollow">'. $img .'</a>';
+    
+}
+/*
+* Woocommerce email template
+*/
+
+
+
 /*Add custom status*/
 // New order status AFTER woo 2.2
 add_action( 'init', 'custom_core_register_my_new_order_statuses' );
@@ -413,7 +484,7 @@ add_action('init', 'tatwerat_startSession', 1);
 
     
 /*
-* Get category tree
+* Get category hierarchy tree
 */
 /*$args = array(
     'hide_empty'         => 0,
@@ -502,8 +573,122 @@ $args_cat = array(
 );
 
 echo  get_main_category_cus_fun($args_cat);
+
+
+
+//str 2
+function custom_woo_category_list_fun($attr) {
+    ob_start();
+    $args_cat = array(
+        'hierarchical' => 1,
+        'show_option_none' => '',
+        'hide_empty' => 1,
+        'parent' => 0,
+        'taxonomy' => 'product_cat',
+            //'orderby' => 'term_id',
+            //'order'   => 'DESC'
+    );
+    echo get_main_category_cus_fun($args_cat);
+    return ob_get_clean();
+}
+add_shortcode('get_custom_woo_category_list', 'custom_woo_category_list_fun');
+function get_sub_category_cus_fun($term_id) {
+
+    $args_cat = array(
+        'hierarchical' => 1,
+        'show_option_none' => '',
+        'hide_empty' => 0,
+        'parent' => $term_id,
+        'taxonomy' => 'product_cat'
+    );
+    $categories = get_categories($args_cat);
+    $html = "";
+    if (count($categories) != 0) {
+
+        $html .= '<ul class="child custom-child" style="display:none;">';
+        foreach ($categories as $categorie) {
+            if ($categorie->name != 'Uncategorized') {
+                $term_link = get_term_link($categorie->term_id);
+                $html .= '<li>';
+                $html .= '<a href="' . $term_link . '">' . $categorie->name . '</a>';
+                $html .= get_sub_category_cus_fun($categorie->term_id);
+                $html .= '</li>';
+            }
+        }
+        $html .= '</ul>';
+    
+    }
+    return $html;
+}
+function get_main_category_cus_fun($args_cat) {
+    $categories = get_categories($args_cat);
+    $html = "";
+    $html .= '<ul class="category-ul">';
+    foreach ($categories as $categorie) {
+        if ($categorie->name != 'Uncategorized') {
+            $term_link = get_term_link($categorie->term_id);
+            $html .= '<li class="custom-parent1">';
+
+
+            $args_cat = array(
+                'hierarchical' => 1,
+                'show_option_none' => '',
+                'hide_empty' => 0,
+                'parent' => $categorie->term_id,
+                'taxonomy' => 'product_cat'
+            );
+            $categories = get_categories($args_cat);
+            if (count($categories) != 0) {
+
+                $html .= '<div class="parent-container">';
+                $html .= '<a  href="' . $term_link . '" style="width:100%;">' . $categorie->name . '</a>';
+                $html .= '<a href="javascript://" class="custom-parent"> <i class="fa fa-angle-down" aria-hidden="true"></i></a>';
+                $html .= '</div>';
+
+            }else{
+                $html .= '<a  href="' . $term_link . '">' . $categorie->name . '</a>';
+            }
+
+
+            $html .= get_sub_category_cus_fun($categorie->term_id);
+
+
+            $html .= '</li>';
+        }
+    }
+    $html .= '</ul>';
+    return $html;
+}
+
+
+add_action('wp_head', 'custom_cat_header_fun');
+function custom_cat_header_fun(){
+
+    ?>
+    <script type="text/javascript">
+        jQuery(document).ready(function(){
+            jQuery(document).on('click', '.custom-parent', function(){
+                var target = jQuery(this);
+                var pp = target.parent().next().slideToggle('slow');
+            });
+        });
+    </script>
+
+    <style type="text/css">
+    .parent-container {
+        display: -ms-flexbox;
+        display: flex; 
+        display: -webkit-flex;
+        -ms-flex-align: center!important; align-items: center!important;
+    }
+    </style>
+    <?php
+
+}
+
+
 /*
-* Get category tree
+* Get category hierarchy  tree
 */
 
 
