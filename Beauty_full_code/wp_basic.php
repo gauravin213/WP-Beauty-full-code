@@ -3,6 +3,8 @@
 
 //https://wordpress.org/plugins/woocommerce-product-payments/
 
+//Paypal lib https://github.com/angelleye/paypal-php-library?
+
 
 /**/
 -SSH
