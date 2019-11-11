@@ -1,0 +1,53 @@
+
+https://career.guru99.com/top-40-word-press-interview-questions/
+
+-What are the types of hooks in WordPress and mention their functions?
+
+There are two types of hooks 1) Action hooks 2) Filter hooks
+
+Hooks allow a user to create WordPress theme or plugin with shortcode without changing the original files. Action hooks allow you to insert an additional code from an outside resource, whereas, Filter hooks will only allow you to add content or text at the end of the post.
+
+
+-What do you mean by a custom field in WordPress?
+The custom field is a meta-data that allows you to store arbitrary information in the WordPress post. Through custom field, extra information can be added to the post.
+
+-What are the rules that you have to follow for WordPress plugin development?
+Create a unique name
+Create the plugin’s folder
+Create a sub-folder for PHP files,  translations, and assets
+Create the main plug-in file and fill in the header information
+Create activation and de-activation functions
+Create an uninstall script
+Create a readme.txt file
+To detect paths to plugin file use proper constants and functions
+
+
+-Why does WordPress use MySQL?
+MySQL is widely available database server and is extremely fast.  It is an open source, and it is available at no cost also it is supported by many low-cost Linux hosts so its easy for anyone to host their website.
+
+-Is it possible to rename the WordPress folder?
+Yes, it is possible to rename the WordPress folder.  If WordPress is already installed, you have to log in to the weblog as the administrator and then change the settings
+
+WordPress address (URI)  :
+
+Blog address( URI) :
+
+After making the changes, you can rename the folder or directory with the WordPress file in it.
+
+-How many tables are there in WordPress by default?
+There are about 11 tables in WordPress by default
+
+- What is WordPress loop?
+To display post WordPress use PHP code, this code is known as a loop
+
+-How can you disable the WordPress comment?
+If you go to the dashboard under options “discussion, there is a comment “ Allow people to post comment” try unchecking the comment.
+
+-What are the steps you can take if your WordPress file is hacked?
+Install security plugins like WP security
+Re-install the latest version of WordPress
+Change password and user-ids for all your users
+Check your themes and plug-ins are up to date
+
+What are the template tags in WordPress?
+In WordPress template tags is a code that instructs WordPress to “do” or “get” something.
