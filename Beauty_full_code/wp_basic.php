@@ -1,6 +1,9 @@
 <?php
 //https://mail.google.com/mail/u/0/#inbox/FMfcgxwBTsgTHFhfZFFNgHKBbBzWgLrL
 
+//https://wordpress.org/plugins/woocommerce-product-payments/
+
+
 /**/
 -SSH
 ssh user_name@domain_name  -p 7822
@@ -14,6 +17,30 @@ cd sandbox
 ssh dieseltruck11@dieseltruckpartsdirect.com   -p 7822
 4BBP2ce5%Y
 /**/
+
+
+
+/*
+* Template redirect
+*/
+add_action('template_redirect', 'single_view_disable');
+function single_view_disable() {
+    global $post;
+    
+    if(is_user_logged_in()){
+        $custom_get_user_role = custom_get_user_role();
+        if($custom_get_user_role == 0){
+            if($post->ID == 146 || $post->ID == 144 || $post->ID == 111):
+            // Redirect back home
+            wp_redirect(home_url(), 301);
+            exit;
+            endif;
+        }
+    }
+}
+/*
+* Template redirect
+*/
 
 
 /*
@@ -1306,6 +1333,12 @@ $args = array( //77392
     'offset'           => 0,
     'category'         => $kategory,
     'category_name'    => '',
+
+    'meta_key' => 'client_feedback_score',
+    'orderby' => 'meta_value_num',
+    'order'            => 'DESC',
+
+
     'category__in'     => array(),
     'post__in'         => array(),
     'orderby'          => 'date',
@@ -1332,6 +1365,12 @@ $args = array( //77392
             'value'     => '1',
             'compare'   => 'LIKE',
         ),
+        array(
+            'key' => '_price',
+            'value' => array(50, 100),
+            'compare' => 'BETWEEN',
+            'type' => 'NUMERIC'
+        )
     ),
     'tax_query' => array(
         'relation' => 'AND',
@@ -1454,7 +1493,58 @@ function chile_init_fun(){
 
 }
 
-[custom_get_posts_list_amp]
+
+
+
+
+//
+    $args = array(
+        'posts_per_page'   => 10,
+        'post__in'         =>array($postID),
+        'orderby'          => 'date',
+        'order'            => 'DESC',
+        'post_type'        => 'property',
+        'post_status'      => 'publish',
+    );
+
+    $query = new WP_Query( $args );
+
+
+    if($query->have_posts()){
+
+        while( $query->have_posts() ) {  $query->the_post();
+
+                $post_thumbnail_id = get_post_thumbnail_id();
+
+                if (!empty($post_thumbnail_id)) {
+                    $image_size = 'medium'; // (thumbnail, medium, large, full or custom size)
+                    $img_url_arr = wp_get_attachment_image_src( $post_thumbnail_id, $image_size );
+
+                    $img_url = $img_url_arr[0];
+
+                }else{
+                    $img_url = home_url().'/wp-content/uploads/2019/11/home-bg-image.jpg';
+                }
+
+            ?>
+            <div>
+                <a href="<?php echo get_permalink();?>">
+                    <img src="<?php echo $img_url?>" style="width: 150px;">
+                </a>
+                <div><?php echo get_the_title();?></div>
+                <div><?php echo get_field('property_price', get_the_ID());?> AED</div>
+            </div>
+            <?php
+        }
+
+        wp_reset_postdata();
+
+    }else{
+        echo 'no post'; echo "<br>";
+    }
+    //
+
+                
 
 /* 
 * End:Post argument
@@ -2517,6 +2607,169 @@ else{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+add_action('admin_post_add_property_form_fe_action', 'add_property_form_fe_action_fun');
+add_action('admin_post_nopriv_add_property_form_fe_action', 'add_property_form_fe_action_fun');
+function add_property_form_fe_action_fun(){
+    
+    $property_category = (int)$_POST['property_category']; echo 'property_category: '.$property_category; echo '<br>';   var_dump($property_category);
+    
+    $property_title = $_POST['property_title']; echo 'property_title: '.$property_title; echo '<br>';
+    
+    $property_type = (int)$_POST['property_type']; echo 'property_type: '.$property_type; echo '<br>';
+    
+    $duration_type = (int)$_POST['duration_type']; echo 'duration_type: '.$duration_type; echo '<br>';
+    
+    $furnished_type = (int)$_POST['furnished_type']; echo 'furnished_type: '.$furnished_type; echo '<br>';
+    
+    $real_estate_consultant = (int)$_POST['real_estate_consultant']; echo 'real_estate_consultant: '.$real_estate_consultant; echo '<br>';
+    
+    $units = $_POST['units']; echo 'units: '.$units; echo '<br>';
+    
+    $area = $_POST['area']; echo 'area: '.$area; echo '<br>';
+    
+    $bedrooms = $_POST['bedrooms']; echo 'bedrooms: '.$bedrooms; echo '<br>';
+    
+    $bathrooms = $_POST['bathrooms']; echo 'bathrooms: '.$bathrooms; echo '<br>';
+    
+    global $user_ID;
+
+    $new_post = array(
+        'ID'        => 114,
+        'post_title' => $property_title,
+        'post_content' => '',
+        'post_status' => 'publish',
+        'post_date' => date('Y-m-d H:i:s'),
+        'post_author' => $user_ID,
+        'post_type' => 'property',
+        //'post_category' => array(5,2,9)
+    );
+
+    //$post_id =  wp_insert_post( $new_post, $wp_error = false );
+    //$post_id =  wp_update_post( $new_post, $wp_error = false );
+    
+    $post_id = 114;
+    
+    echo 'post_id: '.$post_id; echo '<br>';
+    
+    wp_set_object_terms( $post_id, array($property_category), 'property_categories');
+    wp_set_object_terms( $post_id, array($property_type), 'property_type');
+    wp_set_object_terms( $post_id, array($duration_type), 'duration_type');
+    wp_set_object_terms( $post_id, array($furnished_type), 'furnished_type');
+    wp_set_object_terms( $post_id, array($real_estate_consultant), 'real_estate_consultant');
+    
+
+
+    /*update_post_meta($post_id, 'property_price', $property_price);
+    update_post_meta($post_id, 'area', $area);
+    update_post_meta($post_id, 'prop_units', $units);
+    update_post_meta($post_id, 'bedrooms', $bedrooms);
+    update_post_meta($post_id, 'bathrooms', $bathrooms);*/
+    
+  
+    //Upload image
+    /*if($_FILES){
+        
+        foreach ($_FILES as $file => $array){
+            
+            if ($file == 'featured_image') {
+
+                if (!empty($array['name'])) { 
+                    
+                    $_thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+                    
+                    if(empty($_thumbnail_id)){
+                        $attach_id = media_handle_upload($file,$new_post);
+                        update_post_meta($post_id, '_thumbnail_id', $attach_id);
+                        echo 'attach_id: '.$attach_id; echo '<br>';
+                    }
+                }
+            }
+        }
+    }*/
+    //Upload image
+    
+    
+    //property image
+    /*if ( $_FILES ) { 
+    $files = $_FILES["property_image"];  
+    
+    foreach ($files['name'] as $key => $value) {            
+            if ($files['name'][$key]) { 
+                $file = array( 
+                    'name' => $files['name'][$key],
+                    'type' => $files['type'][$key], 
+                    'tmp_name' => $files['tmp_name'][$key], 
+                    'error' => $files['error'][$key],
+                    'size' => $files['size'][$key]
+                ); 
+                $_FILES = array ("property_image" => $file); 
+                foreach ($_FILES as $file => $array) {              
+                    $newupload[] = my_handle_attachment($file,$pid); 
+                }
+            } 
+        } 
+        
+        update_post_meta($post_id, 'images', $newupload);
+    }*/
+    //property image
+
+    die();
+
+}
+
+
+
+
+
+
+function my_handle_attachment($file_handler,$post_id,$set_thu=false) {
+  // check to make sure its a successful upload
+  if ($_FILES[$file_handler]['error'] !== UPLOAD_ERR_OK) __return_false();
+
+  require_once(ABSPATH . "wp-admin" . '/includes/image.php');
+  require_once(ABSPATH . "wp-admin" . '/includes/file.php');
+  require_once(ABSPATH . "wp-admin" . '/includes/media.php');
+
+  $attach_id = media_handle_upload( $file_handler, $post_id );
+  if ( is_numeric( $attach_id ) ) {
+    update_post_meta( $post_id, '_my_file_upload', $attach_id );
+  }
+  return $attach_id;
+}
 ?>
 
 
