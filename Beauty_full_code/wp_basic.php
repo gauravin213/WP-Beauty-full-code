@@ -21,6 +21,32 @@ ssh dieseltruck11@dieseltruckpartsdirect.com   -p 7822
 /**/
 
 
+/*
+* Wp bakery strip all visual composer shortcode/tags 
+*/
+function custom_wp_bakery_save_post_fun($post_id) {
+
+    $get_post_type = get_post_type($post_id);
+
+    $post_content = $_POST['post_content']; 
+
+    WPBMap::addAllMappedShortcodes();
+
+    $post_content_output = apply_filters( 'the_content', $post_content );
+
+    if($get_post_type == 'post' || $get_post_type == 'page' || $get_post_type == 'product' ){
+
+        update_post_meta($post_id, '_custom_wp_bakery_post_content', $post_content_output);
+
+    }
+
+}
+add_action( 'save_post', 'custom_wp_bakery_save_post_fun', 12, 1);
+/*
+* Wp bakery strip all visual composer shortcode/tags 
+*/
+
+
 
 /*
 * Template redirect
@@ -100,10 +126,57 @@ add_filter( 'site_transient_update_plugins', 'my_filter_plugin_updates' );
 
 
 
+
+/*
+* Upload image to wp
+*/
+function my_handle_attachment($file_handler,$post_id,$set_thu=false) {
+  // check to make sure its a successful upload
+  if ($_FILES[$file_handler]['error'] !== UPLOAD_ERR_OK) __return_false();
+
+  require_once(ABSPATH . "wp-admin" . '/includes/image.php');
+  require_once(ABSPATH . "wp-admin" . '/includes/file.php');
+  require_once(ABSPATH . "wp-admin" . '/includes/media.php');
+
+  $attach_id = media_handle_upload( $file_handler, $post_id );
+  if ( is_numeric( $attach_id ) ) {
+    update_post_meta( $post_id, '_my_file_upload', $attach_id );
+  }
+  return $attach_id;
+}
+
+
+
+//Upload image
+if($_FILES){  
+    foreach ($_FILES as $file => $array){
+        
+        if ($file == 'featured_image') {  
+
+            if (!empty($array['name'])) {  
+                
+                $_thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+                
+                if(empty($_thumbnail_id)){
+                    $attach_id = my_handle_attachment($file,$post_id);
+
+                    update_post_meta($post_id, '_thumbnail_id', $attach_id);
+                    //echo 'attach_id: '.$attach_id; echo '<br>';
+                }
+            }
+        }
+    }
+}
+//Upload image
+
+/*
+* Upload image to wp
+*/
+
+
 /*
 * Upload image by url
 */
-
 function crb_insert_attachment_from_url($url, $parent_post_id = null) {
     if( !class_exists( 'WP_Http' ) )
         include_once( ABSPATH . WPINC . '/class-http.php' );
