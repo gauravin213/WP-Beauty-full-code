@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Datepicker - Default functionality</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+ <!--  <script>
+  $( function() {
+    $( "#datepicker" ).datepicker();
+  } );
+  </script> -->
+</head>
+<body>
+ 
+<p>Date: <input type="text" id="MyDate"></p>
+ 
+
+
+
+
+
+    <script type="text/javascript">
+    jQuery(document).ready(function() {
+
+
+      var today = new Date(); // current date
+      var end = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate(); // end date of month
+      var result = [];
+
+      for(let i = 1; i <= end; i++){
+         result.push(today.getFullYear() + '-' + (today.getMonth() +1 < 10? '0'+today.getMonth() +1 : today.getMonth()+1) +'-'+ (i < 10 ? '0'+ i: i));
+
+
+      }
+
+      var show_date_arr = [];
+      var disabled_date_arr = [];
+
+      jQuery.each(result, function(index, val) {
+
+        not_allowed = ["2019-11-21","2019-11-23","2019-11-25"];
+
+        if(jQuery.inArray(val, not_allowed) != -1) {
+          show_date_arr.push(val);
+        } else {
+          disabled_date_arr.push(val);
+        } 
+
+      });
+
+      console.log(show_date_arr); 
+
+      console.log(disabled_date_arr); 
+
+      var array = disabled_date_arr;
+
+      jQuery('#MyDate').datepicker({
+        beforeShowDay: function(date){
+          var string = jQuery.datepicker.formatDate('yy-mm-dd', date);
+          return [ array.indexOf(string) == -1 ]
+        },
+        minDate : 0
+      });
+
+    });
+    </script>
+
+    
+</body>
+</html>
