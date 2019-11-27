@@ -5,6 +5,8 @@
 
 //Paypal lib https://github.com/angelleye/paypal-php-library?
 
+//https://www.cloudways.com/blog/custom-field-woocommerce-checkout-page/
+
 
 /**/
 -SSH
@@ -19,6 +21,87 @@ cd sandbox
 ssh dieseltruck11@dieseltruckpartsdirect.com   -p 7822
 4BBP2ce5%Y
 /**/
+
+
+/*
+* Add login in menu
+*/
+add_filter( 'wp_nav_menu_items', 'wti_loginout_menu_link', 10, 2 );
+function wti_loginout_menu_link( $items, $args ) {
+   if ($args->menu == 'top-links') {
+      if (is_user_logged_in()) {
+         $items .= '<li class="right"><a href="'. get_permalink( get_option('woocommerce_myaccount_page_id') ) .'">'. __("My Account") .'</a></li>';
+      } else {
+         $items .= '<li class="right"><a href="'. get_permalink( get_option('woocommerce_myaccount_page_id') ) .'">'. __("Sign in or Create an account") .'</a></li>';
+      }
+   }
+   return $items;
+}
+
+add_filter( 'wp_nav_menu_items', 'wti_loginout_menu_link', 10, 2 );
+function wti_loginout_menu_link( $items, $args ) {
+   if ($args->menu == 'top-links') {
+      if (is_user_logged_in()) {
+         $items .= '<li class="right"><a href="'. wp_logout_url() .'">'. __("Log Out") .'</a></li>';
+      } else {
+         $items .= '<li class="right"><a href="'. wp_login_url(get_permalink()) .'">'. __("Sign in or Create an account") .'</a></li>';
+      }
+   }
+   return $items;
+}
+/*
+* Add login in menu
+*/
+
+
+
+/*
+* Get menu by location
+*/
+$menu_type = 'top_nav';
+
+$locations = get_nav_menu_locations();
+if ( isset( $locations[ $menu_type ] ) ) {
+
+    echo "==>". $locations[ $menu_type ];
+
+   $menu = get_term( $locations[ $menu_type ], 'nav_menu' );
+
+   $items = wp_get_nav_menu_items( $menu->name );
+
+
+   echo "<pre>"; print_r($menu); echo "</pre>";
+
+
+    /*if ( $items = wp_get_nav_menu_items( $menu->name ) ) {
+                      
+      foreach ( $items as $item ) { 
+
+          echo '<li>';
+
+            echo '<a href="'.$item->url.'">';
+              echo $item->title;
+            echo '</a>';
+           
+          echo '</li>';
+      }
+    }*/
+}
+
+
+function wpmm_setup() {
+
+    register_nav_menus( array(
+        'top_nav' => 'Top nav'
+    ) );
+}
+add_action( 'after_setup_theme', 'wpmm_setup' );
+
+
+/*
+* Get menu by location
+*/
+
 
 
 /*
@@ -756,6 +839,10 @@ function destination_save_metabox( $post_id, $post ) {
 /*
 *  Start:Add the custom fields to the "category" taxonomy, using our callback function  
 */
+
+//https://www.webhat.in/article/woocommerce-tutorial/adding-custom-fields-to-woocommerce-product-category/
+
+
 add_action( 'category_edit_form_fields', 'category_taxonomy_custom_fields', 10, 2 );  
 add_action( 'category_add_form_fields', 'category_taxonomy_custom_fields', 10, 2 );  
 // A callback function to add a custom field to our "category" taxonomy  
@@ -794,6 +881,40 @@ function save_taxonomy_custom_fields( $term_id ) {
   }
     
 }  
+
+
+
+add_action( 'product_cat_edit_form_fields', 'fix_class_editor_fun', 10, 1 ); 
+function fix_class_editor_fun($tag){
+
+   wp_enqueue_editor();
+
+  ?>
+  <script>
+  jQuery(function(){
+
+    jQuery('#description').css('width', '100%');
+    var editorSettings = {
+      mediaButtons: true,
+      tinymce: { 
+        wpautop:true, 
+        plugins : 'charmap colorpicker compat3x directionality fullscreen hr image lists media paste tabfocus textcolor wordpress wpautoresize wpdialogs wpeditimage wpemoji wpgallery wplink wptextpattern wpview', 
+        toolbar1: 'formatselect bold italic | bullist numlist | blockquote | alignleft aligncenter alignright | link unlink | wp_more | spellchecker' 
+      },
+      quicktags: true
+    };
+
+    jQuery(function($){
+      jQuery(document).ready(function() {
+        wp.editor.initialize( 'description', editorSettings );
+      });
+    });
+
+  });
+  </script>
+  <?php
+
+}
 /*
 *  End:Add the fields to the "category" taxonomy, using our callback function  
 */
@@ -1379,7 +1500,7 @@ add_action( 'admin_enqueue_scripts', 'rr_scripts' );
           .open();
           });
 
-         
+         get_the_ID
         jQuery('body').on('click', '.misha_remove_image_button', function(){
             jQuery(this).hide().prev().val('').prev().addClass('button').html('Upload image');
             return false;
@@ -1555,6 +1676,7 @@ function chile_init_fun(){
 
 
             $image_size = 'full'; // (thumbnail, medium, large, full or custom size)
+            
             $image_attributes_thumbnail = wp_get_attachment_image_src( $image, $image_size );
 
 
@@ -2112,7 +2234,7 @@ if (is_admin()) {
 
 global $wpdb;
 
-$query =  "SELECT * FROM wp_dsplite_program";
+$query =  "SELECT * FROM ".$wpdb->prefix."dsplite_program";
 
 $results = $wpdb->get_results( $query );
 print_r($results);
@@ -2699,152 +2821,139 @@ else{
 
 
 
+function custom_set_timer_fun($atts){
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-add_action('admin_post_add_property_form_fe_action', 'add_property_form_fe_action_fun');
-add_action('admin_post_nopriv_add_property_form_fe_action', 'add_property_form_fe_action_fun');
-function add_property_form_fe_action_fun(){
-    
-    $property_category = (int)$_POST['property_category']; echo 'property_category: '.$property_category; echo '<br>';   var_dump($property_category);
-    
-    $property_title = $_POST['property_title']; echo 'property_title: '.$property_title; echo '<br>';
-    
-    $property_type = (int)$_POST['property_type']; echo 'property_type: '.$property_type; echo '<br>';
-    
-    $duration_type = (int)$_POST['duration_type']; echo 'duration_type: '.$duration_type; echo '<br>';
-    
-    $furnished_type = (int)$_POST['furnished_type']; echo 'furnished_type: '.$furnished_type; echo '<br>';
-    
-    $real_estate_consultant = (int)$_POST['real_estate_consultant']; echo 'real_estate_consultant: '.$real_estate_consultant; echo '<br>';
-    
-    $units = $_POST['units']; echo 'units: '.$units; echo '<br>';
-    
-    $area = $_POST['area']; echo 'area: '.$area; echo '<br>';
-    
-    $bedrooms = $_POST['bedrooms']; echo 'bedrooms: '.$bedrooms; echo '<br>';
-    
-    $bathrooms = $_POST['bathrooms']; echo 'bathrooms: '.$bathrooms; echo '<br>';
-    
-    global $user_ID;
-
-    $new_post = array(
-        'ID'        => 114,
-        'post_title' => $property_title,
-        'post_content' => '',
-        'post_status' => 'publish',
-        'post_date' => date('Y-m-d H:i:s'),
-        'post_author' => $user_ID,
-        'post_type' => 'property',
-        //'post_category' => array(5,2,9)
+  extract( shortcode_atts(
+        array(
+           'id' => '',
+            ), $atts )
     );
 
-    //$post_id =  wp_insert_post( $new_post, $wp_error = false );
-    //$post_id =  wp_update_post( $new_post, $wp_error = false );
-    
-    $post_id = 114;
-    
-    echo 'post_id: '.$post_id; echo '<br>';
-    
-    wp_set_object_terms( $post_id, array($property_category), 'property_categories');
-    wp_set_object_terms( $post_id, array($property_type), 'property_type');
-    wp_set_object_terms( $post_id, array($duration_type), 'duration_type');
-    wp_set_object_terms( $post_id, array($furnished_type), 'furnished_type');
-    wp_set_object_terms( $post_id, array($real_estate_consultant), 'real_estate_consultant');
-    
+ob_start();
 
 
-    /*update_post_meta($post_id, 'property_price', $property_price);
-    update_post_meta($post_id, 'area', $area);
-    update_post_meta($post_id, 'prop_units', $units);
-    update_post_meta($post_id, 'bedrooms', $bedrooms);
-    update_post_meta($post_id, 'bathrooms', $bathrooms);*/
-    
-  
-    //Upload image
-    /*if($_FILES){
-        
-        foreach ($_FILES as $file => $array){
-            
-            if ($file == 'featured_image') {
+if (is_user_logged_in()) {
 
-                if (!empty($array['name'])) { 
-                    
-                    $_thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
-                    
-                    if(empty($_thumbnail_id)){
-                        $attach_id = media_handle_upload($file,$new_post);
-                        update_post_meta($post_id, '_thumbnail_id', $attach_id);
-                        echo 'attach_id: '.$attach_id; echo '<br>';
-                    }
-                }
-            }
+
+
+    $user_id = get_current_user_id();
+
+    $minutes_to_add = 10;
+
+    $curr_date = date("Y-m-d H:i:s", strtotime("now"));
+
+    echo 'curr_date: '.$curr_date; echo "<br><br>";
+
+    $time = new DateTime($curr_date);
+
+    $time->add(new DateInterval('PT' . $minutes_to_add . 'M'));
+
+    $stamp = $time->format('Y-m-d H:i:s'); echo "<br><br>";
+
+    //update_option('_minute_countdown', $stamp);
+
+
+    $_minute_countdown = get_option('_minute_countdown');
+
+    if ($_minute_countdown && !empty($_minute_countdown)) {
+      
+        echo 'saved date:  '.$_minute_countdown; echo "<br><br>";
+
+        $get_min_sec = date_create($_minute_countdown);
+
+        $get_min_sec_1 = date_format($get_min_sec,"i:s");
+
+        $get_min = (int)date_format($get_min_sec,"i");
+
+        $get_cal_sec = (int)date_format($get_min_sec,"i")*60;
+
+        echo 'min sec:  '.$get_min_sec_1; echo "<br>";
+        echo 'min:  '.$get_min; echo "<br>";
+        echo 'cal sec:  '.$get_cal_sec; echo "<br>";
+
+        if ($_minute_countdown > $curr_date) {
+          echo "valide";
+          ?>
+          <div class="countdown"></div>
+          <!-- <script type="text/javascript">
+            jQuery(document).ready(function() {
+
+              var timer2 = "<?php //echo $get_min_sec_1; ?>";
+              var interval = setInterval(function() {
+                var timer = timer2.split(':');
+                //by parsing integer, I avoid all extra string processing
+                var minutes = parseInt(timer[0], 10);
+                var seconds = parseInt(timer[1], 10);
+                --seconds;
+                minutes = (seconds < 0) ? --minutes : minutes;
+                if (minutes < 0) clearInterval(interval);
+                seconds = (seconds < 0) ? 59 : seconds;
+                seconds = (seconds < 10) ? '0' + seconds : seconds;
+                //minutes = (minutes < 10) ?  minutes : minutes;
+                jQuery('.countdown').html(minutes + ':' + seconds);
+                timer2 = minutes + ':' + seconds;
+              }, 1000);
+
+
+            });
+          </script> -->
+          <div class="clock" style="margin:2em;"></div>
+          <div class="message"></div>
+          <script type="text/javascript">
+            jQuery(document).ready(function() {
+
+                var clock;
+
+                var get_cal_sec = "<?php echo $get_cal_sec; ?>";
+              
+                clock = jQuery('.clock').FlipClock(get_cal_sec, {
+                    countdown: true,
+                  clockFace: 'HourlyCounter'
+                });
+
+
+            });
+          </script>
+
+          <?php
+
+        }else{
+          echo "Note valide";
         }
-    }*/
-    //Upload image
-    
-    
-    //property image
-    /*if ( $_FILES ) { 
-    $files = $_FILES["property_image"];  
-    
-    foreach ($files['name'] as $key => $value) {            
-            if ($files['name'][$key]) { 
-                $file = array( 
-                    'name' => $files['name'][$key],
-                    'type' => $files['type'][$key], 
-                    'tmp_name' => $files['tmp_name'][$key], 
-                    'error' => $files['error'][$key],
-                    'size' => $files['size'][$key]
-                ); 
-                $_FILES = array ("property_image" => $file); 
-                foreach ($_FILES as $file => $array) {              
-                    $newupload[] = my_handle_attachment($file,$pid); 
-                }
-            } 
-        } 
-        
-        update_post_meta($post_id, 'images', $newupload);
-    }*/
-    //property image
 
-    die();
+    }
 
+
+
+  
+}else{
+
+    echo 'Not Logged In';
 }
-
-
-
-
-
-
-function my_handle_attachment($file_handler,$post_id,$set_thu=false) {
-  // check to make sure its a successful upload
-  if ($_FILES[$file_handler]['error'] !== UPLOAD_ERR_OK) __return_false();
-
-  require_once(ABSPATH . "wp-admin" . '/includes/image.php');
-  require_once(ABSPATH . "wp-admin" . '/includes/file.php');
-  require_once(ABSPATH . "wp-admin" . '/includes/media.php');
-
-  $attach_id = media_handle_upload( $file_handler, $post_id );
-  if ( is_numeric( $attach_id ) ) {
-    update_post_meta( $post_id, '_my_file_upload', $attach_id );
-  }
-  return $attach_id;
+return ob_get_clean();
 }
+add_shortcode('custom_set_timer', 'custom_set_timer_fun');
+
+
+
+
+<div class="clock" style="margin:2em;"></div>
+          <div class="message"></div>
+          <script type="text/javascript">
+            jQuery(document).ready(function() {
+
+                var clock;
+
+                var get_cal_sec = "<?php echo $get_cal_sec; ?>";
+              
+                clock = jQuery('.clock').FlipClock(get_cal_sec, {
+                    countdown: true,
+                  clockFace: 'HourlyCounter'
+                });
+
+
+            });
+          </script>
 ?>
 
 
@@ -2893,3 +3002,15 @@ user and usermeta
 wp_woocommerce_order_items and wp_woocommerce_order_itemsmeta
 
 coments and comentmeta
+
+
+
+
+
+
+
+
+
+<meta name="keywords" content="keyword1, keyword2" />
+
+<meta name="description" content="this is the description of this page" />
