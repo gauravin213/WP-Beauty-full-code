@@ -1,5 +1,32 @@
 <?php
 
+/*
+* Add fields in oeder 
+*/
+add_action( 'woocommerce_admin_order_data_after_billing_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
+add_action( 'woocommerce_admin_order_data_after_shipping_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
+function my_custom_checkout_field_display_admin_order_meta( $order ){
+    $order_id = method_exists( $order, 'get_id' ) ? $order->get_id() : $order->id;
+    echo '<p><strong>'.__('My Field Name').':</strong> ' . get_post_meta( $order_id, 'my_field_name', true ) . '</p>';
+}
+/*
+* Add fields in oeder 
+*/
+
+
+
+/*
+* Function to return new placeholder image URL.
+*/
+add_filter( 'woocommerce_placeholder_img_src', 'growdev_custom_woocommerce_placeholder', 10 );
+function growdev_custom_woocommerce_placeholder( $image_url ) {
+  $image_url = home_url().'/wp-content/uploads/2019/11/category-placeholder-thestickerboy-2.png';  // change this to the URL to your custom placeholder
+  return $image_url;
+}
+/*
+* Function to return new placeholder image URL.
+*/
+
 
 /*
 * Woocommerce email template
@@ -818,6 +845,10 @@ is_cart()
 //Checkout page
 is_checkout()
 
+//Checkout page
+is_account_page();
+
+
 
 ///////user
 if (is_user_logged_in()) {
@@ -1038,6 +1069,14 @@ function filter_woocommerce_shipping_fields( $fields ) {
 
     return $fields;
 }; 
+
+//validate
+add_action('woocommerce_checkout_process', 'customise_checkout_field_process');
+function customise_checkout_field_process()
+{
+  // if the field is set, if not then show an error message.
+  if (!$_POST['customised_field_name']) wc_add_notice(__('Please enter value.') , 'error');
+
          
 // add the filter 
 add_filter( 'woocommerce_shipping_fields', 'filter_woocommerce_shipping_fields', 10, 2 ); 
