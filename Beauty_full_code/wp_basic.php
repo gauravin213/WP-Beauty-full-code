@@ -8,6 +8,13 @@
 //https://www.cloudways.com/blog/custom-field-woocommerce-checkout-page/
 
 
+http://www.darwinbiler.com/creating-composer-package-library/
+
+
+
+
+
+
 /**/
 -SSH
 ssh user_name@domain_name  -p 7822
@@ -21,6 +28,68 @@ cd sandbox
 ssh dieseltruck11@dieseltruckpartsdirect.com   -p 7822
 4BBP2ce5%Y
 /**/
+
+
+
+
+
+/*
+* Admin search
+*/
+/*add_action('admin_head', 'maybe_modify_admin_css');
+
+function maybe_modify_admin_css() {
+
+    $args = array(
+                    'posts_per_page'   => -1,
+                    'orderby'          => 'date',
+                    'order'            => 'DESC',
+                    'post_type'        => 'tmmledger_customer',
+                    'post_status'      => 'publish',
+                );
+
+                $query = new WP_Query( $args );
+
+                if($query->have_posts()){
+
+                    while( $query->have_posts() ) {  $query->the_post();
+
+                       echo "pppppppppppppppppppppppppppppppp: ".get_the_ID();
+                    }
+
+                    wp_reset_postdata();
+                }
+}*/
+
+
+
+
+/*add_filter( 'posts_join', 'segnalazioni_search_join' );
+function segnalazioni_search_join ( $join ) {
+    global $pagenow, $wpdb;
+
+    // I want the filter only when performing a search on edit page of Custom Post Type named "segnalazioni".
+    if ( is_admin() && 'edit.php' === $pagenow && 'segnalazioni' === $_GET['post_type'] && ! empty( $_GET['s'] ) ) {    
+        $join .= 'LEFT JOIN ' . $wpdb->postmeta . ' ON ' . $wpdb->posts . '.ID = ' . $wpdb->postmeta . '.post_id ';
+    }
+    return $join;
+}
+
+add_filter( 'posts_where', 'segnalazioni_search_where' );
+function segnalazioni_search_where( $where ) {
+    global $pagenow, $wpdb;
+
+    // I want the filter only when performing a search on edit page of Custom Post Type named "segnalazioni".
+    if ( is_admin() && 'edit.php' === $pagenow && 'segnalazioni' === $_GET['post_type'] && ! empty( $_GET['s'] ) ) {
+        $where = preg_replace(
+            "/\(\s*" . $wpdb->posts . ".post_title\s+LIKE\s*(\'[^\']+\')\s*\)/",
+            "(" . $wpdb->posts . ".post_title LIKE $1) OR (" . $wpdb->postmeta . ".meta_value LIKE $1)", $where );
+    }
+    return $where;
+}*/
+/*
+* Admin search
+*/
 
 
 /*
@@ -1939,7 +2008,29 @@ function pagination($pages = '', $range = 4)
      }
 }
 
-pagination($myposts->max_num_pages); 
+
+
+$args = array(
+        'posts_per_page'   => 25,
+        'paged'            => $paged,
+        'orderby'          => 'date',
+        'order'            => 'DESC',
+        'post_type'        => 'product',
+        'post_status'      => 'publish',
+        'tax_query' => array(
+            array(
+                'taxonomy' => 'product_cat',
+                'field'    => 'term_id',
+                'terms'    => $cate_trem_ids,
+                'operator' => 'IN'
+            )
+        )
+    );
+
+  $loop = new WP_Query($args);
+
+
+pagination($loop->max_num_pages); 
 /* 
 * End add pagination
 */ 
@@ -2805,7 +2896,21 @@ else{
 
 
 
+$to = "peter.quickfix@gmail.com";
+$subject = "Test";
+$txt = "Testing! cron.php  55";
+$headers = "From: peter.quickfix@gmail.com";;
 
+
+$result = mail($to,$subject,$txt,$headers);
+
+if($result)
+{
+    echo "csend";
+}
+else{
+    echo "not send";
+}
 
 
 
@@ -3010,7 +3115,3 @@ coments and comentmeta
 
 
 
-
-<meta name="keywords" content="keyword1, keyword2" />
-
-<meta name="description" content="this is the description of this page" />
