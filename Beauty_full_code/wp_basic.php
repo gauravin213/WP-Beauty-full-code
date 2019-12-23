@@ -12,7 +12,44 @@ http://www.darwinbiler.com/creating-composer-package-library/
 
 
 
+/*
+* Register end point
+*/
+add_action( 'rest_api_init', 'my_register_route' );
+function my_register_route() {
 
+    register_rest_route( 'my-route', 'my-phrase', array(
+                    'methods' => 'GET',
+                    'callback' => 'custom_phrase',
+                    'permission_callback' => function($request) {
+                            return true;
+                        },
+                )
+            );
+}
+function custom_phrase() {
+
+   //http://127.0.0.1/wordpress521/wp-json/my-route/my-phrase?pp=11
+
+    $post_author = 'all';
+    $posts_list = get_posts( array( 'type' => 'post', 'author' => $post_author ) );
+    $post_data = array();
+    foreach( $posts_list as $posts) {
+        $post_id = $posts->ID;
+        $post_author = $posts->post_author;
+        $post_title = $posts->post_title;
+        $post_content = $posts->post_content;
+        $post_data[ $post_id ][ 'author' ] = $post_author;
+        $post_data[ $post_id ][ 'title' ] = $post_title;
+        $post_data[ $post_id ][ 'content' ] = $post_content;
+    }
+    wp_reset_postdata();
+    return rest_ensure_response( $post_data );
+
+}
+/*
+* Register end point
+*/
 
 
 /**/
