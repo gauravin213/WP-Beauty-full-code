@@ -11,6 +11,7 @@
 http://www.darwinbiler.com/creating-composer-package-library/
 
 
+//wp boostrap theme : https://github.com/rachelbaker/bootstrapwp-Twitter-Bootstrap-for-WordPress
 
 /*
 * Register end point
@@ -1375,6 +1376,43 @@ function ajax_function(){
         success: function (response) {  alert(response);
         }
     });
+
+
+
+    $("#uploadForm").on('submit',(function(e) { 
+        e.preventDefault();
+        $.ajax({
+              url: "<?php echo $block->getUrl('clagmp/index/Uploadfile');?>",
+              type: "POST",
+              data:  new FormData(this),
+              contentType: false,
+              processData:false,
+              beforeSend: function(){
+                $('#imageloag').show();
+              },
+              complete: function(){
+                  $('#imageloag').hide(); 
+              },
+              success: function(data)
+              {
+                
+
+                if(data)
+                {
+                  $('#image').val(data);
+                  $('#img_msg').show();
+                }
+                else
+                {
+                    alert("Error! ".data);
+                }
+
+              },
+              error: function() 
+              {
+              }           
+         });
+      }));
 </script>
 <?php
 /*
