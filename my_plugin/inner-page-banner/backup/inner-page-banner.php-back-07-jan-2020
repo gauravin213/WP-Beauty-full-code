@@ -14,6 +14,17 @@ define( 'InnerPageBanner_VERSION', '1.0.0' );
 define( 'InnerPageBanner_URL', plugin_dir_url( __FILE__ ) );
 define( 'InnerPageBanner_PATH', plugin_dir_path( __FILE__ ) );
 
+/*
+if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+    // Put your plugin code here
+}*/
+
+add_action( 'plugins_loaded', 'cuspricecal_load_textdomain');
+function cuspricecal_load_textdomain(){
+  load_plugin_textdomain( 'inner-page-banner', false, basename( dirname( __FILE__ ) ) . '/languages/' );
+}
+
+
 if (!class_exists('InnerPageBanner')) {
 
   class InnerPageBanner {
@@ -24,15 +35,16 @@ if (!class_exists('InnerPageBanner')) {
 
       add_action('add_meta_boxes', array($this, 'TmmLedger_meta_boxes'), 10);
 
-      add_action( 'admin_menu', array($this, 'InnerPageBanner_admin_menu_fun') );
-
       add_action('save_post', array($this, 'InnerPageBanner_save_post'), 10, 1);
 
       add_shortcode('InnerPageBannerFrontEndShortcode', array($this, 'InnerPageBannerFrontEndShortcodeFun') );
 
       add_filter( 'manage_edit-inner_page_banner_columns', array($this, 'InnerPageBannerColumnFun' ) );
+ 
       add_action( 'manage_inner_page_banner_posts_custom_column', array($this, 'InnerPageBannerValueFun') , 11);
-      
+
+      add_action( 'admin_menu', array($this, 'InnerPageBanner_admin_menu_fun') );
+
       add_filter( 'posts_join', array($this, 'InnerPageBanner_search_join') );
       add_filter( 'posts_where', array($this, 'InnerPageBanner_search_search_where') );
       add_filter( 'posts_distinct', array($this, 'InnerPageBanner_search_distinct') );
@@ -41,13 +53,6 @@ if (!class_exists('InnerPageBanner')) {
 
       add_action( 'wp_ajax_InnerPageBannerSelection_action', array($this, 'InnerPageBannerSelection_action'));
       add_action( 'wp_ajax_nopriv_InnerPageBannerSelection_action', array($this, 'InnerPageBannerSelection_action'));
-
-      add_action( 'wp_ajax_InnerCatBanner_action_select2', array($this, 'InnerCatBanner_action_select2'));
-      add_action( 'wp_ajax_nopriv_InnerCatBanner_action_select2', array($this, 'InnerCatBanner_action_select2'));
-
-      add_action( 'wp_ajax_InnerPageBanner_show_selected_pages', array($this, 'InnerPageBanner_show_selected_pages'));
-      add_action( 'wp_ajax_nopriv_InnerPageBanner_show_selected_pages', array($this, 'InnerPageBanner_show_selected_pages'));
-
 
     }
 
@@ -62,6 +67,8 @@ if (!class_exists('InnerPageBanner')) {
 
     public function InnerPageBanner_search_join ( $join ) {
         global $pagenow, $wpdb;
+
+        // I want the filter only when performing a search on edit page of Custom Post Type named "segnalazioni".
         if ( is_admin() && 'edit.php' === $pagenow && 'inner_page_banner' === $_GET['post_type'] && ! empty( $_GET['s'] ) ) {    
             $join .= 'LEFT JOIN ' . $wpdb->postmeta . ' ON ' . $wpdb->posts . '.ID = ' . $wpdb->postmeta . '.post_id ';
         }
@@ -71,6 +78,7 @@ if (!class_exists('InnerPageBanner')) {
     public function InnerPageBanner_search_search_where( $where ) {
         global $pagenow, $wpdb;
 
+        // I want the filter only when performing a search on edit page of Custom Post Type named "segnalazioni".
         if ( is_admin() && 'edit.php' === $pagenow && 'inner_page_banner' === $_GET['post_type'] && ! empty( $_GET['s'] ) ) {
             $where = preg_replace(
                 "/\(\s*" . $wpdb->posts . ".post_title\s+LIKE\s*(\'[^\']+\')\s*\)/",
@@ -93,7 +101,7 @@ if (!class_exists('InnerPageBanner')) {
 
     public function InnerPageBanner_admin_menu_fun(){
 
-      $parent_slug = "edit.php?post_type=inner_page_banner";
+      $parent_slug = "edit.php?post_type=inner_page_banner"; //edit.php?post_type=product
 
       $page_title = 'Banner Settings';
 
@@ -170,9 +178,7 @@ if (!class_exists('InnerPageBanner')) {
 
         case 'banner_img' :
 
-        $attachment_id = get_post_meta( $post->ID, '_thumbnail_id', true );
-
-        //$attachment_id = get_post_meta( $post->ID, 'InnerPageBannerImage', true );
+        $attachment_id = get_post_meta( $post->ID, 'InnerPageBannerImage', true );
 
         $image_size = 'thumbnail'; // (thumbnail, medium, large, full or custom size)
           
@@ -186,34 +192,24 @@ if (!class_exists('InnerPageBanner')) {
 
         case 'selected_page' :
 
-            
-          //
-          $InnerPageBannerType = get_post_meta( $post->ID, 'InnerPageBannerType', true ); 
-          $InnerPageBannerSelection = get_post_meta( $post->ID, 'InnerPageBannerSelection', true );
+            $InnerPageBannerType = get_post_meta( $post->ID, 'InnerPageBannerType', true ); 
 
-          foreach ($InnerPageBannerSelection as $data) {
+            $page_id = (int)get_post_meta( $post->ID, 'InnerPageBannerSelection', true );
 
-            $selected_element_id = (int)$data; 
+           if ($InnerPageBannerType == 'InnerPageBannerPage' || $InnerPageBannerType == 'InnerPageBannerProduct') {  
+              $preview_url = get_permalink($page_id);
+              $page_id = get_post_meta( $post->ID, 'InnerPageBannerSelection', true );
+              $page_title = get_the_title($page_id);
 
-             if ($InnerPageBannerType == 'InnerPageBannerPage' || $InnerPageBannerType == 'InnerPageBannerProduct') {  
-                $preview_url = get_permalink($selected_element_id);
-                $page_title = get_the_title($selected_element_id);
-               ?>
-               <div>Page: <a target="_blank" href="<?php echo $preview_url?>"><?php echo $page_title?></a></div>
-               <?php
+           }else if($InnerPageBannerType == 'InnerPageBannerProductCategory'){ 
+              $preview_url = get_term_link( $page_id, 'product_cat' ); 
+              $term = get_term($page_id);
+              $page_title = $term->name;
+           }else{
+              $preview_url = "--";
+           }
 
-             }else if($InnerPageBannerType == 'InnerPageBannerProductCategory'){ 
-                $preview_url = get_term_link( $selected_element_id, 'product_cat' ); 
-                $term = get_term($selected_element_id);
-                $page_title = $term->name;
-                ?>
-               <div>Category: <a target="_blank" href="<?php echo $preview_url?>"><?php echo $page_title?></a></div>
-               <?php
-             }else{
-                $preview_url = "";
-             }
-          }
-          //
+          echo '<a target="_blank" href="'.$preview_url.'">'.$page_title.'</a>';
           
               break;
 
@@ -251,11 +247,12 @@ if (!class_exists('InnerPageBanner')) {
           'show_in_nav_menus'   => true,
           'show_in_admin_bar'   => true,
           'rewrite'       => array('slug' => 'inner-page-banner'),
-          'capability_type'=> 'post',
+          'capability_type'=> 'psp_project',
+          //'capability_type'     => array('psp_project','psp_projects'),
           'has_archive'   => true,
           'hierarchical'  => false,
           'menu_position' => 5,
-          'supports'            => array( 'title', 'thumbnail'),
+          'supports'            => array( 'title'),
           'menu_icon' => 'dashicons-welcome-write-blog'
       );
 
@@ -288,24 +285,18 @@ if (!class_exists('InnerPageBanner')) {
             //echo 'page_id: '.$page_id;
           }
 
-
+         
           $InnerPageBanner_Response = $this->InnerPageBanner_GetPageID($page_id);
 
-          //echo "<pre>"; print_r($InnerPageBanner_Response); echo "</pre>";
-         
           if (!empty($InnerPageBanner_Response)) {
 
-            $banner_id = $InnerPageBanner_Response[0]->banner_id;
+            $banner_post_id = $InnerPageBanner_Response[0]->post_id;
 
-            $banner_post_status = get_post_status($banner_id);
+            $banner_post_status = get_post_status($banner_post_id);
 
             if ( $banner_post_status == 'publish') {
 
-              $BannerAttachment = get_post_meta( $banner_id, '_thumbnail_id', true );
-
-              //$BannerAttachment = get_post_meta( $banner_id, 'InnerPageBannerImage', true );
-
-              $InnerPageBannerLink = get_post_meta( $banner_id, 'InnerPageBannerLink', true );
+              $BannerAttachment = get_post_meta( $banner_post_id, 'InnerPageBannerImage', true );
 
               if (!empty($BannerAttachment)) {
 
@@ -316,9 +307,7 @@ if (!class_exists('InnerPageBanner')) {
                 $banner_url = $image_attributes_thumbnail[0];
                 ?>
                 <div class="diesel-ads-image">
-                  <a href="<?php echo $InnerPageBannerLink;?>">
-                    <img src="<?php echo $banner_url;?>" style="width:100%;">
-                  </a>
+                  <img src="<?php echo $banner_url;?>" style="width:100%;">
                 </div>
                 <?php
 
@@ -336,7 +325,7 @@ if (!class_exists('InnerPageBanner')) {
 
       global $wpdb;
 
-      $query =  "SELECT * FROM ".$wpdb->prefix."InnerPageBanner WHERE page_id =".$page_id;
+      $query =  "SELECT * FROM ".$wpdb->prefix."postmeta WHERE meta_key = 'InnerPageBannerSelection' AND meta_value = '".$page_id."'";
 
       $results = $wpdb->get_results( $query );
 
@@ -348,93 +337,49 @@ if (!class_exists('InnerPageBanner')) {
     public function InnerPageBannerMetabox(){
       global $post; 
 
-       $InnerPageBannerSelection = get_post_meta( $post->ID, 'InnerPageBannerSelection', true );
-
-       $banner_id = $post->ID;
-
-       //echo "<pre>"; print_r($InnerPageBannerSelection); echo "</pre>";
+       $InnerPageBannerSelection = (int)get_post_meta( $post->ID, 'InnerPageBannerSelection', true );
 
        $page_id = $InnerPageBannerSelection;
 
        $InnerPageBannerImage = get_post_meta( $post->ID, 'InnerPageBannerImage', true );
 
-       $InnerPageBannerLink = get_post_meta( $post->ID, 'InnerPageBannerLink', true );
+       $InnerPageBannerType = get_post_meta( $post->ID, 'InnerPageBannerType', true ); echo "<br>";
 
-       $InnerPageBannerLinkVal = '#';
-       if ($InnerPageBannerLink && !empty($InnerPageBannerLink)) {
-         $InnerPageBannerLinkVal = $InnerPageBannerLink;
+       if ($InnerPageBannerType == 'InnerPageBannerPage' || $InnerPageBannerType == 'InnerPageBannerProduct') {  
+          $preview_url = get_permalink($page_id);
+       }else if($InnerPageBannerType == 'InnerPageBannerProductCategory'){ 
+          $preview_url = get_term_link( $page_id, 'product_cat' ); 
+       }else{
+          $preview_url = "";
        }
 
-       $InnerPageBannerType = get_post_meta( $post->ID, 'InnerPageBannerType', true ); 
-
       ?>
-
-      <style type="text/css">
-      .InnerPageBannerOverlayLoaderClass{
-        position: absolute;
-          display: block;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(167, 159, 159, 0.5);
-          z-index: 9999;
-          cursor: pointer;
-          background-image: url('<?php echo InnerPageBanner_URL;?>/spinner-2x.gif');
-          background-repeat: no-repeat;
-          background-position: center;
-      }
-
-      </style>
-      <div id="InnerPageBannerOverlayLoader"></div>
-
       <div>
-        <?php
-        foreach ($InnerPageBannerSelection as $data) {
-
-          $selected_element_id = (int)$data;
-
-           if ($InnerPageBannerType == 'InnerPageBannerPage' || $InnerPageBannerType == 'InnerPageBannerProduct') {  
-              $preview_url = get_permalink($selected_element_id);
-
-             ?>
-              <div>
-                <label>Preview: </label>
-                <a target="_blank" href="<?php echo $preview_url?>"><?php echo $preview_url?></a>
-              </div>
-             <?php
-
-           }else if($InnerPageBannerType == 'InnerPageBannerProductCategory'){ 
-              $preview_url = get_term_link( $selected_element_id, 'product_cat' ); 
-              ?>
-              <div>
-                <label>Preview: </label>
-                <a target="_blank" href="<?php echo $preview_url?>"><?php echo $preview_url?></a>
-              </div>
-             <?php
-           }else{
-              $preview_url = "";
-           }
-        }
-        ?>
 
 
-      
+        <div>
+          <label>Preview: </label>
+          <a target="_blank" href="<?php echo $preview_url?>"><?php echo $preview_url?></a>
+        </div>
+
+
+
         <div>
           <ul style="display: flex;">
             <li>Page<input type="radio" name="InnerPageBannerType" value="InnerPageBannerPage" style="margin-left: 4px;" <?php if ($InnerPageBannerType == 'InnerPageBannerPage') { echo "checked";}?>></li>
 
             <li>Product Category<input type="radio" name="InnerPageBannerType" value="InnerPageBannerProductCategory" style="margin-left: 4px;" <?php if ($InnerPageBannerType == 'InnerPageBannerProductCategory') { echo "checked";}?>></li>
 
+
+            <!-- <li>Product<input type="radio" name="InnerPageBannerType" value="InnerPageBannerProduct" style="margin-left: 4px;" <?php if ($InnerPageBannerType == 'InnerPageBannerProduct') { echo "checked";}?>></li> -->
           </ul>
         </div>
 
 
         <div class="tabs">
+
           <div id="InnerPageBannerPage" class="InnerPageBannerTabLi" style="display: none;">
-             <select name='InnerPageBannerSelection[]' id="InnerPageBannerSelection" multiple="multiple">
+            <select name='InnerPageBannerSelection[]' id="InnerPageBannerSelection" multiple="multiple">
                 <option value='0'><?php _e('Select a Page', 'textdomain'); ?></option>
                 <?php $pages = get_pages(); ?>
                 <?php foreach( $pages as $page ) { ?>
@@ -444,7 +389,7 @@ if (!class_exists('InnerPageBanner')) {
           </div>
 
           <div id="InnerPageBannerProductCategory" class="InnerPageBannerTabLi" style="display: none;">
-          <select name='InnerCatBanner_action_select2[]' id="InnerCatBanner_action_select2" multiple="multiple">
+          <select name='InnerCatBanner_action_select2' id="InnerCatBanner_action_select2">
                 <option value='0'><?php _e('Select a Page', 'textdomain'); ?></option>
                 <?php $terms = get_terms( 'product_cat' ); ?>
                 <?php foreach( $terms as $term ) { ?>
@@ -454,35 +399,43 @@ if (!class_exists('InnerPageBanner')) {
 
           </div>
 
+
+          <!-- <div id="InnerPageBannerProduct" class="InnerPageBannerTabLi" style="display: none;"> -->
+            <?php  if ($_GET['post']) {
+           /* $product = wc_get_product( $page_id );
+            $product_name = $product->get_title();
+            $product_id = $product->get_id();*/
+             ?>
+              <!--  <select name='InnerProductBanner_action_select2' id="InnerProductBanner_action_select2">
+                 <option value="<?php echo $product_id;?>" selected><?php echo $product_name?></option>
+               </select> -->
+            <?php }else{ ?>
+              <!-- <select name='InnerProductBanner_action_select2' id="InnerProductBanner_action_select2"></select> -->
+            <?php } ?>
+          <!-- </div> -->
+
         </div>
 
-        <br>
 
-        <!-- <div> -->
-        <?php
-            //echo $this->inner_page_baaner_image_uploader_field( 'InnerPageBannerImage', $InnerPageBannerImage );
-        ?>
-       <!--  </div> -->
+        <br><br>
 
-        <!-- <br><br> -->
+
 
         <div>
-          <label>
-            Banner Url:
-          </label>
-          <input type="text" name="InnerPageBannerLink" id="InnerPageBannerLink" value="<?php echo $InnerPageBannerLinkVal;?>" style="width:100%;">
+        <?php
+            echo $this->inner_page_baaner_image_uploader_field( 'InnerPageBannerImage', $InnerPageBannerImage );
+        ?>
         </div>
 
         <script type="text/javascript">
         jQuery(function($){
 
 
+          
 
-          jQuery('#InnerPageBannerOverlayLoader').insertBefore('#InnerPageBanner > .inside');
 
-          /*
-          * Radio button type chnage tab
-          */
+
+          //
           var InnerPageBannerType = '<?php echo $InnerPageBannerType;?>';
           jQuery('#'+InnerPageBannerType).show();
 
@@ -497,17 +450,77 @@ if (!class_exists('InnerPageBanner')) {
             jQuery('#'+banner_type).show();
 
           });
-          /*
-          * Radio button type chnage tab
-          */
+          //
 
 
+          jQuery.fn.SetBannerAjaxAction = function(page_id, saved_page_id){
+
+              jQuery.ajax({
+
+                url: '<?php echo admin_url( 'admin-ajax.php');?>',
+                type: "POST",
+                data: {'action': 'InnerPageBannerSelection_action', 'page_id': page_id},
+                cache: false,
+                dataType: 'json',
+                beforeSend: function(){
+                },
+                complete: function(){
+                },
+                success: function (response) { 
+
+                  var a = parseInt(response['page_id']);
+
+                  var b = parseInt(saved_page_id);
+
+                  var c = (a+b);
+
+                  if (a != b) {
+
+                    if (response['count'] == 1) {
+                      jQuery( "#publish" ).prop( "disabled", true );
+                      alert('This page alredy use for banner');
+                    }else{
+                      jQuery( "#publish" ).prop( "disabled", false );
+                    }
+
+                  }else{
+                    jQuery( "#publish" ).prop( "disabled", false );
+                  }
+                  console.log(response);
+                }
+            });
+
+          }
+        
           /*
           * Select Page
           */ 
+
+          
+
+
           jQuery('#InnerPageBannerSelection').select2({
             width: '100%',
             placeholder : "select me" 
+          });
+
+
+         /* var Values = new Array();
+          Values.push("16");
+          Values.push("2");
+          jQuery("#InnerPageBannerSelection").val(Values).trigger('change');*/
+
+
+          jQuery(document).on('change', '#InnerPageBannerSelection', function(){
+
+            jQuery( "#publish" ).prop( "disabled", true );
+
+            var page_id = jQuery(this).find(':selected').val(); 
+
+            var saved_page_id = '<?php echo $page_id;?>';
+
+            jQuery(this).SetBannerAjaxAction(page_id, saved_page_id);
+
           });
           /*
           * Select Page
@@ -517,6 +530,11 @@ if (!class_exists('InnerPageBanner')) {
           /*
           * Select Product Category
           */ 
+          /*jQuery('#InnerCatBanner_action_select2').select2({
+            width: '100%',
+            placeholder : "select me" 
+          });*/
+
           jQuery('#InnerCatBanner_action_select2').select2({
             ajax: {
               url: '<?php echo admin_url( 'admin-ajax.php');?>', //"https://api.github.com/search/repositories",
@@ -559,68 +577,48 @@ if (!class_exists('InnerPageBanner')) {
           */ 
 
 
-
-
           /*
-          * Show selected pages
+          * Select Product
           */
-          var InnerPageBannerType = jQuery('input[name="InnerPageBannerType"]:checked').val();
-          var banner_id = '<?php echo $banner_id;?>';
-          jQuery.ajax({
-              url: '<?php echo admin_url( 'admin-ajax.php');?>',
-              type: "POST",
-              data: {'action': 'InnerPageBanner_show_selected_pages', 'banner_id': banner_id},
-              cache: false,
+          /*jQuery('#InnerProductBanner_action_select2').select2({
+            ajax: {
+              url: '<?php echo admin_url( 'admin-ajax.php');?>', //"https://api.github.com/search/repositories",
               dataType: 'json',
-              beforeSend: function(){
-                jQuery('#InnerPageBannerOverlayLoader').addClass('InnerPageBannerOverlayLoaderClass');
+              delay: 250, // delay in ms while typing when to perform a AJAX search
+              data: function (params) {  
+                  return {
+                    q: params.term, // search query
+                    action: 'InnerProductBanner_action_select2' // AJAX action for admin-ajax.php
+                  };
               },
-              complete: function(){
-                jQuery('#InnerPageBannerOverlayLoader').removeClass('InnerPageBannerOverlayLoaderClass');
-              },
-              success: function (response) { 
+              processResults: function( data ) {  
 
-                var Values = new Array();
-             
-                jQuery.each( response['response'], function( key, val ) { 
-                    Values.push( val );
-                });
+                console.log(data);
 
-                if (InnerPageBannerType == 'InnerPageBannerPage') {
-                  jQuery("#InnerPageBannerSelection").val(Values).trigger('change');
-                }else if(InnerPageBannerType == 'InnerPageBannerProductCategory'){
-                  jQuery("#InnerCatBanner_action_select2").val(Values).trigger('change');
-                }else{
-                  //alert("Page Note Found");
+               
+                var options = [];
+                if ( data ) {
+                
+                  // data is the array of arrays, and each of them contains ID and the Label of the option
+                    jQuery.each( data, function( index, text ) { // do not forget that "index" is just auto incremented value
+                      options.push( { id: text[0], text: text[1]  } );
+                    });
+
+
                 }
-                //console.log(response['response']);
-              }
-          });
-          /*
-          * Show selected pages
-          */
-
-
-          /*
-          * Validate selected page
-          */
-          /*jQuery(document).on('change', '#InnerPageBannerSelection', function(){
-
-            jQuery( "#publish" ).prop( "disabled", true );
-
-            //var page_id = jQuery(this).find(':selected').val(); 
-        
-            var page_id = jQuery("#InnerPageBannerSelection :selected").map(function(i, el) {
-                return jQuery(el).val();
-            }).get();
-
-            console.log(page_id);
-
+                return {
+                  results: options
+                };
+            },
+            cache: true
+            },
+            minimumInputLength: 3, // the minimum of symbols to input before perform a search
+            width: '100%',
+            placeholder : "select me" 
           });*/
           /*
-          * Validate selected page
+          * Select Product
           */
-
 
 
           /*
@@ -665,88 +663,58 @@ if (!class_exists('InnerPageBanner')) {
 
 
 
-
-
-
-    /*
-    * 
-    */
-    public function InnerPageBanner_show_selected_pages(){
-
-      $banner_id = $_POST['banner_id'];
-      $InnerPageBannerSelection = get_post_meta( $banner_id, 'InnerPageBannerSelection', true );
-      $myArr = array('response' => $InnerPageBannerSelection, 'banner_id'=>$banner_id);
-      $myJSON = json_encode($myArr); 
-      echo $myJSON;
-      die();
-    }
-
-
-
-
-    /*
-    * Save post meta
-    */
     public function InnerPageBanner_save_post($post_id){
 
-      global $post; global $wpdb;
+      global $post;
 
       $InnerPageBannerType = $_POST['InnerPageBannerType'];
 
-
-
-
      
-      if ($InnerPageBannerType == 'InnerPageBannerPage'){  
+      if ($InnerPageBannerType == 'InnerPageBannerPage'){ 
 
-        $selection_id = $_POST['InnerPageBannerSelection'];
+        $sanitized = wp_filter_post_kses( $_POST['InnerPageBannerSelection'] );
+        update_post_meta( $post_id, 'InnerPageBannerSelection', $sanitized );
 
-        update_post_meta( $post_id, 'InnerPageBannerSelection', $selection_id );
-
-        $InnerPageBannerTitle = get_the_title($selection_id);
+        $InnerPageBannerTitle = get_the_title($sanitized);
         update_post_meta( $post_id, 'InnerPageBannerTitle', $InnerPageBannerTitle );
+
 
        }
 
        if ($InnerPageBannerType == 'InnerPageBannerProductCategory'){ 
           
-          $selection_id = $_POST['InnerCatBanner_action_select2'];
-         
-          update_post_meta( $post_id, 'InnerPageBannerSelection', $selection_id );
+          $sanitized = wp_filter_post_kses( $_POST['InnerCatBanner_action_select2'] );
+          update_post_meta( $post_id, 'InnerPageBannerSelection', $sanitized );
 
-          $term = get_term($selection_id);
+          $term = get_term($sanitized);
           $category_name = $term->name;
           update_post_meta( $post_id, 'InnerPageBannerTitle', $category_name );
 
        }
 
 
-      /*if (isset( $_POST['InnerPageBannerImage'] ) ) {
+       /*if ($InnerPageBannerType == 'InnerPageBannerProduct'){ 
+          
+          $sanitized = wp_filter_post_kses( $_POST['InnerProductBanner_action_select2'] );
+          update_post_meta( $post_id, 'InnerPageBannerSelection', $sanitized );
+
+          $product = wc_get_product( $sanitized );
+
+          $product_name = $product->get_title();
+
+          update_post_meta( $post_id, 'InnerPageBannerTitle', $product_name );
+
+       }*/
+
+
+
+       
+
+
+      if (isset( $_POST['InnerPageBannerImage'] ) ) {
         $sanitized = wp_filter_post_kses( $_POST['InnerPageBannerImage'] );
-        $attachment_id = $sanitized;
-        update_post_meta( $post_id, 'InnerPageBannerImage', $sanitized );
-      }*/
-
-
-      if (isset( $_POST['_thumbnail_id'] ) ) {
-        $sanitized = wp_filter_post_kses( $_POST['_thumbnail_id'] );
-        $attachment_id = $sanitized;
         update_post_meta( $post_id, 'InnerPageBannerImage', $sanitized );
       }
-
-
-      $InnerPageBannerLink = $_POST['InnerPageBannerLink'];
-      $InnerPageBannerLinkVal = '#';
-      if ($InnerPageBannerLink && !empty($InnerPageBannerLink)) {
-       $InnerPageBannerLinkVal = $InnerPageBannerLink;
-      }
-
-      update_post_meta( $post_id, 'InnerPageBannerLink', $InnerPageBannerLinkVal );
-
-      /*if (isset( $_POST['InnerPageBannerLink'] ) ) {
-        $sanitized = wp_filter_post_kses( $_POST['InnerPageBannerLink'] );
-        update_post_meta( $post_id, 'InnerPageBannerLink', $InnerPageBannerLinkVal );
-      }*/
 
 
       if (isset( $_POST['InnerPageBannerType'] ) ) {
@@ -755,72 +723,11 @@ if (!class_exists('InnerPageBanner')) {
       }
 
 
-      //die();
-
-
-
-      //
-      //echo "<pre>"; print_r($selection_id); echo "</pre>";
-      foreach ($selection_id as $element_id) {
-
-          $query_up =  "SELECT * FROM ".$wpdb->prefix."InnerPageBanner WHERE page_id=".$element_id;
-          $results_up = $wpdb->get_results( $query_up );
-          $count = count($results_up); echo "<br>";
-
-          if ($count > 0) {
-
-            $wpdb->update( 
-              $wpdb->prefix.'InnerPageBanner', 
-              array( 
-                'banner_id' => $post_id, 
-                'attachment_id' => $attachment_id,
-              ), 
-              array( 'page_id' => $element_id ), 
-              array( 
-                '%d', 
-                '%d'  
-              ),  
-              array( '%d' ) 
-            );
-            
-          }else{
-
-            /*$query_de = "DELETE FROM ".$wpdb->prefix."InnerPageBanner WHERE page_id =".$element_id;
-            $wpdb->query($query_de); */
-
-            $wpdb->insert( 
-              $wpdb->prefix.'InnerPageBanner', 
-              array( 
-                'banner_id' => $post_id, 
-                'page_id' => $element_id,
-                'attachment_id' => $attachment_id,
-              ), 
-              array( 
-                '%d', 
-                '%d',
-                '%d'  
-              ) 
-            );
-
-
-          }
-              
-      }
-      //
-      //die();
-
-
-
+       //die();
 
     }
 
 
-
-
-
-    /*
-     * Page Category search ajax
-     */
     public function InnerPageBannerSelection_action(){
 
       global $wpdb;
@@ -860,30 +767,6 @@ if (!class_exists('InnerPageBanner')) {
 
     }
 
-
-   /*
-   * Product Category search ajax
-   */
-    public function InnerCatBanner_action_select2(){
-      $return = array();
-
-      $terms = get_terms( 'product_cat', array(
-          'name__like' => $_GET['q'],
-          'hide_empty' => true  
-      ) );
-      if ( count($terms) > 0 ){
-
-          foreach ( $terms as $term ) {
-
-             $return[] = array( $term->term_id, $term->name );
-
-          }
-      }
-      echo json_encode( $return );
-      die;
-    }
-
-
   }
 
 }
@@ -892,28 +775,76 @@ new InnerPageBanner();
 
 
 
-function create_InnerPageBanner_database_table(){
+add_action( 'wp_ajax_InnerCatBanner_action_select2', 'InnerCatBanner_action_select2');
+add_action( 'wp_ajax_nopriv_InnerCatBanner_action_select2', 'InnerCatBanner_action_select2');
+function InnerCatBanner_action_select2(){
+  // we will pass post IDs and titles to this array
+  $return = array();
 
-    global $table_prefix, $wpdb;
+  $terms = get_terms( 'product_cat', array(
+      'name__like' => $_GET['q'],
+      'hide_empty' => true // Optional 
+  ) );
+  if ( count($terms) > 0 ){
 
-    $tblname = 'InnerPageBanner';
-    $wp_track_table = $table_prefix . "$tblname ";
+      foreach ( $terms as $term ) {
 
-    #Check to see if the table exists already, if not, then create it
-    if($wpdb->get_var( "show tables like '$wp_track_table'" ) != $wp_track_table) {
+         $return[] = array( $term->term_id, $term->name );
 
-        $sql = "CREATE TABLE IF NOT EXISTS {$wp_track_table} (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          banner_id VARCHAR(255) NOT NULL,
-          page_id VARCHAR(255) NOT NULL,
-          attachment_id VARCHAR(255) NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );";
+          
+      }
+  }
 
-        require_once( ABSPATH . '/wp-admin/includes/upgrade.php' );
-        dbDelta($sql);
-    }
+  echo json_encode( $return );
+  die;
 }
 
-register_activation_hook( __FILE__, 'create_InnerPageBanner_database_table' );
+
+add_action( 'wp_ajax_InnerProductBanner_action_select2', 'InnerProductBanner_action_select2');
+add_action( 'wp_ajax_nopriv_InnerProductBanner_action_select2', 'InnerProductBanner_action_select2');
+function InnerProductBanner_action_select2(){
+  // we will pass post IDs and titles to this array
+  $return = array();
+
+  // you can use WP_Query, query_posts() or get_posts() here - it doesn't matter
+  $search_results = new WP_Query( array( 
+    's'=> $_GET['q'], // the search query
+     'post_type'        => 'product',
+    'post_status' => 'publish', // if you don't want drafts to be returned
+    //'ignore_sticky_posts' => 1,
+    'posts_per_page' => -1 // how much to show at once
+  ) );
+
+  if( $search_results->have_posts() ) :
+    while( $search_results->have_posts() ) : $search_results->the_post(); 
+      // shorten the title a little
+      $title = ( mb_strlen( $search_results->post->post_title ) > 50 ) ? mb_substr( $search_results->post->post_title, 0, 49 ) . '...' : $search_results->post->post_title;
+      $return[] = array( $search_results->post->ID, $title ); // array( Post ID, Post Title )
+    endwhile;
+  endif;
+
+  echo json_encode( $return );
+  die;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ?>
