@@ -13,6 +13,184 @@ http://www.darwinbiler.com/creating-composer-package-library/
 
 //wp boostrap theme : https://github.com/rachelbaker/bootstrapwp-Twitter-Bootstrap-for-WordPress
 
+
+https://www.codexworld.com/paypal-express-checkout-integration-in-php/
+
+
+wp_list_table
+https://premium.wpmudev.org/blog/wordpress-admin-tables/
+
+
+
+//Wp all versions:
+https://wordpress.org/download/releases/
+
+
+/*wc_get_template(
+        'loop/orderby.php',
+        array(
+            'catalog_orderby_options' => '',
+            'orderby'                 => '',
+            'show_default_orderby'    => '',
+        )
+    );*/
+
+
+
+/*
+* Assign post to the category
+*/
+wp_set_object_terms( 27, 'Apple', 'product_cat', true);
+wp_remove_object_terms( 28, 'Apple', 'product_cat');
+/*
+* Assign post to the category
+*/
+
+
+
+
+function getParentCatids($product_id){
+
+    //$cat_data_arr = array();
+
+    $terms = get_the_terms($product_id , 'product_cat');
+
+    foreach ($terms as $term) {
+
+        if ($term->parent != 0 || $term->parent != "") {
+            $cat_data_arr[$term->term_id] = $term->parent;
+            getParentCatids($term->parent);
+        }
+    }
+
+    return $cat_data_arr;
+}
+
+
+$getParentCatids = getParentCatids(get_the_ID());
+
+
+/*
+* Wp tab menu
+*/
+if ( isset ( $_GET['tab'] ) ) ilc_admin_tabs($_GET['tab']); else ilc_admin_tabs('homepage');
+?>
+<form method="post" action="<?php admin_url( 'themes.php?page=theme-settings' ); ?>">
+<?php
+wp_nonce_field( "ilc-settings-page" ); 
+
+if ( $_GET['page'] == 'tmm-desred' ){
+
+   if ( isset ( $_GET['tab'] ) ) $tab = $_GET['tab'];
+   else $tab = 'homepage';
+
+   echo '<table class="form-table">';
+   switch ( $tab ){
+      case 'general' :
+         ?>
+         <tr>
+            <th>Tags with CSS classes:</th>
+            <td>
+               <input id="ilc_tag_class" name="ilc_tag_class" type="checkbox" <?php if ( $settings["ilc_tag_class"] ) echo 'checked="checked"'; ?> value="true" />
+               <label for="ilc_tag_class">Checking this will output each post tag with a specific CSS class based on its slug.</label>
+            </td>
+         </tr>
+         <?php
+      break;
+      case 'footer' :
+         ?>
+         <tr>
+            <th><label for="ilc_ga">Insert tracking code:</label></th>
+            <td>
+               Enter your Google Analytics tracking code:
+               <textarea id="ilc_ga" name="ilc_ga" cols="60" rows="5"><?php echo esc_html( stripslashes( $settings["ilc_ga"] ) ); ?></textarea><br />
+
+            </td>
+         </tr>
+         <?php
+      break;
+      case 'homepage' :
+         ?>
+         <tr>
+            <th><label for="ilc_intro">Introduction</label></th>
+            <td>
+               Enter the introductory text for the home page:
+               <textarea id="ilc_intro" name="ilc_intro" cols="60" rows="5" ><?php echo esc_html( stripslashes( $settings["ilc_intro"] ) ); ?></textarea>
+            </td>
+         </tr>
+         <?php
+      break;
+   }
+   echo '</table>';
+}
+
+?>
+   <p class="submit" style="clear: both;">
+      <input type="submit" name="Submit"  class="button-primary" value="Update Settings" />
+      <input type="hidden" name="ilc-settings-submit" value="Y" />
+   </p>
+</form>
+<!---->
+?>
+<?php
+function ilc_admin_tabs($current = 'homepage') { 
+
+    $tabs = array( 'homepage' => 'Home Settings', 'general' => 'General', 'footer' => 'Footer' );
+    echo '<div id="icon-themes" class="icon32"><br></div>';
+    echo '<div class="nav-tab-wrapper">';
+    foreach( $tabs as $tab => $name ){
+        $class = ( $tab == $current ) ? 'nav-tab-active' : '';
+        echo "<a class='nav-tab $class' href='?page=tmm-desred&tab=$tab'>$name</a>";
+
+    }
+    echo '</div>';
+}
+/*
+* Wp tab menu
+*/
+
+
+
+/*
+* Admin notice
+*/
+function sample_admin_notice__success() {
+
+  $screen = get_current_screen();
+
+  echo $screen->id;
+  //if ( $screen->id !== 'toplevel_page_YOUR_PLUGIN_PAGE_SLUG') return;
+
+    ?>
+  <div class="notice notice-success is-dismissible">
+    <p><?php _e( 'Done!', 'sample-text-domain' ); ?></p>
+  </div>
+
+  <div class="notice notice-warning is-dismissible">
+    <p><?php _e('Sorry, I can not go through this.', 'textdomain') ?></p>
+  </div>
+
+  <div class="notice notice-error is-dismissible">
+    <p><?php _e('Sorry, I can not go through this.', 'textdomain') ?></p>
+  </div>
+
+    <?php
+}
+add_action( 'admin_notices', 'sample_admin_notice__success' );
+
+$id = wp_insert_post(...);
+if (is_wp_error($id)) {
+    $errors = $id->get_error_messages();
+    foreach ($errors as $error) {
+        echo $error; //this is just an example and generally not a good idea, you should implement means of processing the errors further down the track and using WP's error/message hooks to display them
+    }
+}
+
+/*
+* Admin notice
+*/
+
+
 /*
 * Register end point
 */
@@ -74,29 +252,30 @@ ssh dieseltruck11@dieseltruckpartsdirect.com   -p 7822
 /*
 * Admin search
 */
+
 /*add_action('admin_head', 'maybe_modify_admin_css');
 
 function maybe_modify_admin_css() {
 
     $args = array(
-                    'posts_per_page'   => -1,
-                    'orderby'          => 'date',
-                    'order'            => 'DESC',
-                    'post_type'        => 'tmmledger_customer',
-                    'post_status'      => 'publish',
-                );
+          'posts_per_page'   => -1,
+          'orderby'          => 'date',
+          'order'            => 'DESC',
+          'post_type'        => 'tmmledger_customer',
+          'post_status'      => 'publish',
+      );
 
-                $query = new WP_Query( $args );
+      $query = new WP_Query( $args );
 
-                if($query->have_posts()){
+      if($query->have_posts()){
 
-                    while( $query->have_posts() ) {  $query->the_post();
+          while( $query->have_posts() ) {  $query->the_post();
 
-                       echo "pppppppppppppppppppppppppppppppp: ".get_the_ID();
-                    }
+             echo "pppppppppppppppppppppppppppppppp: ".get_the_ID();
+          }
 
-                    wp_reset_postdata();
-                }
+          wp_reset_postdata();
+      }
 }*/
 
 
@@ -541,6 +720,14 @@ function salient_child_enqueue_styles() {
 
 
     //For plugin define( 'WOOREL_URI', plugin_dir_url( __FILE__ ) );
+
+    define( 'TmmLedger_VERSION', '1.0.0' );
+    define( 'TmmLedger_URL', plugin_dir_url( __FILE__ ) );
+    define( 'TmmLedger_PATH', plugin_dir_path( __FILE__ ) );
+
+    plugin_dir_path( dirname( __FILE__, 2 ) );
+    plugin_dir_url( dirname( __FILE__, 2 ) );
+
     wp_enqueue_script( 'cus-js1',WOOREL_URI . '/js/custom.js', array( 'jquery' ), '1.0', true );
     wp_enqueue_style('cus-css1', WOOREL_URI . '/assets/css/wc-quantity-increment.css', array(), '1.0', 'all' );
 
@@ -1340,6 +1527,10 @@ add_action( 'after_setup_theme', 'wetime_theme_setup' );
 add_action( 'wp_ajax_{action_name}', 'ajax_function');
 add_action( 'wp_ajax_nopriv_{action_name}', 'ajax_function');
 function ajax_function(){
+
+    $myArr = array(
+        'response' => 'xyz'
+    );
     $myJSON = json_encode($myArr); 
     echo $myJSON;
     die();
@@ -1347,7 +1538,7 @@ function ajax_function(){
 ?>
 <script type="text/javascript">
     jQuery.ajax({
-        url: data.ajaxurl,
+        url: '<?php echo admin_url( 'admin-ajax.php');?>',
         type: "POST",
         data: {'action': 'cuspricecal_my_action', 'productId': data.product_id,enterd_qty: qty, ammountofcolor: color},
         cache: false,
@@ -1668,6 +1859,9 @@ add_action( 'admin_enqueue_scripts', 'rr_scripts' );
 https://www.billerickson.net/code/wp_query-arguments/
 
 
+
+
+
 $args = array( //77392
     'posts_per_page'   => -1,
     'offset'           => 0,
@@ -1723,6 +1917,10 @@ $args = array( //77392
     ),
     'date_query'     => array( 'after' => $search_date ),
 );
+
+
+
+
 
 
 /*$args = array(
@@ -1816,13 +2014,12 @@ function chile_init_fun(){
 
 
             echo substr(strip_tags(get_the_content()),0,25)
+            
             get_the_excerpt();
-
 
             $image_size = 'full'; // (thumbnail, medium, large, full or custom size)
             
             $image_attributes_thumbnail = wp_get_attachment_image_src( $image, $image_size );
-
 
 
         }
@@ -1838,9 +2035,14 @@ function chile_init_fun(){
 
 
 
+
+
+
 //
+    $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
     $args = array(
         'posts_per_page'   => 10,
+        'paged'         =>$paged,
         'post__in'         =>array($postID),
         'orderby'          => 'date',
         'order'            => 'DESC',
@@ -1850,7 +2052,8 @@ function chile_init_fun(){
 
     $query = new WP_Query( $args );
 
-
+    $count = $query->found_posts;
+    
     if($query->have_posts()){
 
         while( $query->have_posts() ) {  $query->the_post();
@@ -1877,6 +2080,14 @@ function chile_init_fun(){
             </div>
             <?php
         }
+
+
+        $GLOBALS['wp_query']->max_num_pages = $query->max_num_pages;
+        the_posts_pagination( array(
+        'mid_size' => 5,
+        'prev_text' => __( '<', 'welsh-womens-aid' ),
+        'next_text' => __( '>', 'welsh-womens-aid' ),
+        ) );
 
         wp_reset_postdata();
 
@@ -2084,6 +2295,7 @@ function pagination($pages = '', $range = 4)
 }
 
 
+$paged = get_query_var('paged') ? get_query_var('paged') : 1) 
 
 $args = array(
         'posts_per_page'   => 25,
@@ -2180,18 +2392,8 @@ get_the_terms( int|object $post, string $taxonomy )
 get_the_category( $post_id ) //post id
 
 
-
 //get all categories by textonomi
 get_terms(); //taxonomy
-
-//get single category by term id
-get_term( int|WP_Term|object $term, string $taxonomy = '', string $output = OBJECT, string $filter = 'raw' )
-
-//get single category by term id
-//Note : It is working only for native post_type
-get_category( int|object $category, string $output = OBJECT, string $filter = 'raw' )
-
-
 
 //Get child category
 $args = array(
@@ -2204,6 +2406,18 @@ $args = array(
        //'order'   => 'DESC'
     );
 get_categories( $args ) 
+
+
+//get single category by term id
+get_term( int|WP_Term|object $term, string $taxonomy = '', string $output = OBJECT, string $filter = 'raw' )
+
+//get single category by term id
+//Note : It is working only for native post_type
+get_category( int|object $category, string $output = OBJECT, string $filter = 'raw' )
+
+
+
+
 
 
 
@@ -2709,8 +2923,11 @@ function wpse_30331_manipulate_views( $what, $views )
      * e.g. Attachments have completely different counts 
      */
     $total = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE (post_status = 'publish' OR post_status = 'draft' OR post_status = 'pending') AND (post_author = '$user_ID'  AND post_type = '$what' ) ");
+
     $publish = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'publish' AND post_author = '$user_ID' AND post_type = '$what' ");
+
     $draft = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'draft' AND post_author = '$user_ID' AND post_type = '$what' ");
+
     $pending = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'pending' AND post_author = '$user_ID' AND post_type = '$what' ");
 
     /*
@@ -3118,22 +3335,25 @@ add_shortcode('custom_set_timer', 'custom_set_timer_fun');
 
 
 <div class="clock" style="margin:2em;"></div>
-          <div class="message"></div>
-          <script type="text/javascript">
-            jQuery(document).ready(function() {
 
-                var clock;
+<div class="message"></div>
 
-                var get_cal_sec = "<?php echo $get_cal_sec; ?>";
-              
-                clock = jQuery('.clock').FlipClock(get_cal_sec, {
-                    countdown: true,
-                  clockFace: 'HourlyCounter'
-                });
+<script type="text/javascript">
+  jQuery(document).ready(function() {
+
+      var clock;
+
+      var get_cal_sec = "<?php echo $get_cal_sec; ?>";
+    
+      clock = jQuery('.clock').FlipClock(get_cal_sec, {
+          countdown: true,
+        clockFace: 'HourlyCounter'
+      });
 
 
-            });
-          </script>
+  });
+</script>
+
 ?>
 
 
@@ -3150,7 +3370,7 @@ add_shortcode('custom_set_timer', 'custom_set_timer_fun');
 wp-admin/includes/schema.php 
 capabilities
 
-Loop post
+Loop post / Register post_type
 wp-inculede/post.php
 wp-inculede/post-template.php
 wp-inculede/post-thumbnail.php
@@ -3190,3 +3410,115 @@ coments and comentmeta
 
 
 
+
+Type of fund collection:
+
+1) Varshik abhidan(L.M No, Calender, collected by, Date of collection, Amount)==
+
+2) Pariwar Kalyan Yojna(it is divided into 5 Charan)Along with donation and Refund---
+
+3) Bhawan Mad (Lm number, Amount, Date)--
+
+4) Maha adhiveshan(calender, Reg fee, fees amount)--
+
+5) Dormitory (Lm number, date, amount)===
+
+6) Mess expenses (Lm number, date, total meals, total amount)===
+
+7) Vishes anudan (Lm number, collection date, amount)---
+
+8) Sangharsh mad (LM number, date, amount)---
+
+9) Fixed deposit (LM number, Amount, date of collection, maturity date, maturity amount)
+
+10) Current account(amount, LM number, Date)
+
+11) Interest amount(Lm Number, Amount)
+
+12) Others(Lm number, Fund name, Fund Amount, Date)
+
+
+
+
+
+
+
+
+function get_csv_formated_data1(){
+
+    $args = array(
+        'posts_per_page'   => -1,
+        'orderby'          => 'date',
+        'order'            => 'DESC',
+        'post_type'        => 'product',
+        'post_status'      => 'publish',
+        'tax_query' => array(
+            'relation' => 'AND',
+            array(
+                'taxonomy' => 'product_cat',
+                'field'    => 'term_id',
+                'terms'    => array(44),
+                'operator' => 'IN'
+            )
+        )
+    );
+
+    $query = new WP_Query( $args );
+
+    if($query->have_posts()){
+
+        while( $query->have_posts() ) {  $query->the_post();
+
+            $title = get_the_title();
+
+            $post_id = get_the_ID();
+
+            $category = str_get_category($post_id);
+           
+            $compatibility_chart = str_get_compatibility_year($post_id);
+
+            $p[] = array(
+                $post_id,
+                $title,
+                $category,
+                $compatibility_chart
+            );
+
+        }
+
+        wp_reset_postdata();
+
+    }else{
+        return 'no post';
+    }
+
+    return $p;
+
+}
+
+
+
+
+/*$product_id = 91794;
+$category = str_get_category($product_id);
+echo "<pre>category: "; print_r($category); echo "</pre>";
+$compatibility_chart = str_get_compatibility_year($product_id);
+echo "<pre>compatibility_chart: "; print_r($compatibility_chart); echo "</pre>";*/
+
+
+//$terms = get_the_terms($product_id , 'product_cat');
+//wp_set_object_terms( 27, 'Apple', 'product_cat', true);
+//wp_remove_object_terms( 28, 'Apple', 'product_cat');
+
+
+
+/*//
+$cat_id = 44;
+$term_children = get_term_children( $cat_id, 'product_cat' ); 
+$categories = array_merge(array($cat_id), $term_children);
+$categories_i = implode(', ', $categories);
+$q = "SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_taxonomy_id FROM wp_term_taxonomy WHERE taxonomy='product_cat' AND term_id IN (".$categories_i.") )) AND post_type='product' AND post_status='publish'";
+$results = $wpdb->get_results($q, ARRAY_A);
+$results = array_column($results, 'ID');
+echo "<pre>----------------1"; print_r($results); echo "</pre>";
+//*/
