@@ -25,6 +25,12 @@ https://premium.wpmudev.org/blog/wordpress-admin-tables/
 //Wp all versions:
 https://wordpress.org/download/releases/
 
+Re
+
+https://www.anthonycarbon.com/uncaught-typeerror-grecaptcha-render-is-not-a-function/
+
+
+
 
 /*wc_get_template(
         'loop/orderby.php',
@@ -3208,151 +3214,20 @@ else{
 
 
 
+/*
+* Wp selct query
+*/ 
 
+"SELECT ID FROM wp_posts WHERE ID IN () AND post_status='publish'";
 
+"SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN ()";
 
+"SELECT term_id FROM wp_terms WHERE term_id IN ()";
 
-
-
-
-
-
-
-function custom_set_timer_fun($atts){
-
-  extract( shortcode_atts(
-        array(
-           'id' => '',
-            ), $atts )
-    );
-
-ob_start();
-
-
-if (is_user_logged_in()) {
-
-
-
-    $user_id = get_current_user_id();
-
-    $minutes_to_add = 10;
-
-    $curr_date = date("Y-m-d H:i:s", strtotime("now"));
-
-    echo 'curr_date: '.$curr_date; echo "<br><br>";
-
-    $time = new DateTime($curr_date);
-
-    $time->add(new DateInterval('PT' . $minutes_to_add . 'M'));
-
-    $stamp = $time->format('Y-m-d H:i:s'); echo "<br><br>";
-
-    //update_option('_minute_countdown', $stamp);
-
-
-    $_minute_countdown = get_option('_minute_countdown');
-
-    if ($_minute_countdown && !empty($_minute_countdown)) {
-      
-        echo 'saved date:  '.$_minute_countdown; echo "<br><br>";
-
-        $get_min_sec = date_create($_minute_countdown);
-
-        $get_min_sec_1 = date_format($get_min_sec,"i:s");
-
-        $get_min = (int)date_format($get_min_sec,"i");
-
-        $get_cal_sec = (int)date_format($get_min_sec,"i")*60;
-
-        echo 'min sec:  '.$get_min_sec_1; echo "<br>";
-        echo 'min:  '.$get_min; echo "<br>";
-        echo 'cal sec:  '.$get_cal_sec; echo "<br>";
-
-        if ($_minute_countdown > $curr_date) {
-          echo "valide";
-          ?>
-          <div class="countdown"></div>
-          <!-- <script type="text/javascript">
-            jQuery(document).ready(function() {
-
-              var timer2 = "<?php //echo $get_min_sec_1; ?>";
-              var interval = setInterval(function() {
-                var timer = timer2.split(':');
-                //by parsing integer, I avoid all extra string processing
-                var minutes = parseInt(timer[0], 10);
-                var seconds = parseInt(timer[1], 10);
-                --seconds;
-                minutes = (seconds < 0) ? --minutes : minutes;
-                if (minutes < 0) clearInterval(interval);
-                seconds = (seconds < 0) ? 59 : seconds;
-                seconds = (seconds < 10) ? '0' + seconds : seconds;
-                //minutes = (minutes < 10) ?  minutes : minutes;
-                jQuery('.countdown').html(minutes + ':' + seconds);
-                timer2 = minutes + ':' + seconds;
-              }, 1000);
-
-
-            });
-          </script> -->
-          <div class="clock" style="margin:2em;"></div>
-          <div class="message"></div>
-          <script type="text/javascript">
-            jQuery(document).ready(function() {
-
-                var clock;
-
-                var get_cal_sec = "<?php echo $get_cal_sec; ?>";
-              
-                clock = jQuery('.clock').FlipClock(get_cal_sec, {
-                    countdown: true,
-                  clockFace: 'HourlyCounter'
-                });
-
-
-            });
-          </script>
-
-          <?php
-
-        }else{
-          echo "Note valide";
-        }
-
-    }
-
-
-
-  
-}else{
-
-    echo 'Not Logged In';
-}
-return ob_get_clean();
-}
-add_shortcode('custom_set_timer', 'custom_set_timer_fun');
-
-
-
-
-<div class="clock" style="margin:2em;"></div>
-
-<div class="message"></div>
-
-<script type="text/javascript">
-  jQuery(document).ready(function() {
-
-      var clock;
-
-      var get_cal_sec = "<?php echo $get_cal_sec; ?>";
-    
-      clock = jQuery('.clock').FlipClock(get_cal_sec, {
-          countdown: true,
-        clockFace: 'HourlyCounter'
-      });
-
-
-  });
-</script>
+"SELECT term_id FROM wp_term_taxonomy WHERE taxonomy = 'product_tag'";
+/*
+* Wp selct query
+*/ 
 
 ?>
 
@@ -3402,123 +3277,3 @@ user and usermeta
 wp_woocommerce_order_items and wp_woocommerce_order_itemsmeta
 
 coments and comentmeta
-
-
-
-
-
-
-
-
-
-Type of fund collection:
-
-1) Varshik abhidan(L.M No, Calender, collected by, Date of collection, Amount)==
-
-2) Pariwar Kalyan Yojna(it is divided into 5 Charan)Along with donation and Refund---
-
-3) Bhawan Mad (Lm number, Amount, Date)--
-
-4) Maha adhiveshan(calender, Reg fee, fees amount)--
-
-5) Dormitory (Lm number, date, amount)===
-
-6) Mess expenses (Lm number, date, total meals, total amount)===
-
-7) Vishes anudan (Lm number, collection date, amount)---
-
-8) Sangharsh mad (LM number, date, amount)---
-
-9) Fixed deposit (LM number, Amount, date of collection, maturity date, maturity amount)
-
-10) Current account(amount, LM number, Date)
-
-11) Interest amount(Lm Number, Amount)
-
-12) Others(Lm number, Fund name, Fund Amount, Date)
-
-
-
-
-
-
-
-
-function get_csv_formated_data1(){
-
-    $args = array(
-        'posts_per_page'   => -1,
-        'orderby'          => 'date',
-        'order'            => 'DESC',
-        'post_type'        => 'product',
-        'post_status'      => 'publish',
-        'tax_query' => array(
-            'relation' => 'AND',
-            array(
-                'taxonomy' => 'product_cat',
-                'field'    => 'term_id',
-                'terms'    => array(44),
-                'operator' => 'IN'
-            )
-        )
-    );
-
-    $query = new WP_Query( $args );
-
-    if($query->have_posts()){
-
-        while( $query->have_posts() ) {  $query->the_post();
-
-            $title = get_the_title();
-
-            $post_id = get_the_ID();
-
-            $category = str_get_category($post_id);
-           
-            $compatibility_chart = str_get_compatibility_year($post_id);
-
-            $p[] = array(
-                $post_id,
-                $title,
-                $category,
-                $compatibility_chart
-            );
-
-        }
-
-        wp_reset_postdata();
-
-    }else{
-        return 'no post';
-    }
-
-    return $p;
-
-}
-
-
-
-
-/*$product_id = 91794;
-$category = str_get_category($product_id);
-echo "<pre>category: "; print_r($category); echo "</pre>";
-$compatibility_chart = str_get_compatibility_year($product_id);
-echo "<pre>compatibility_chart: "; print_r($compatibility_chart); echo "</pre>";*/
-
-
-//$terms = get_the_terms($product_id , 'product_cat');
-//wp_set_object_terms( 27, 'Apple', 'product_cat', true);
-//wp_remove_object_terms( 28, 'Apple', 'product_cat');
-
-
-
-/*//
-$cat_id = 44;
-$term_children = get_term_children( $cat_id, 'product_cat' ); 
-$categories = array_merge(array($cat_id), $term_children);
-$categories_i = implode(', ', $categories);
-$q = "SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_taxonomy_id FROM wp_term_taxonomy WHERE taxonomy='product_cat' AND term_id IN (".$categories_i.") )) AND post_type='product' AND post_status='publish'";
-$results = $wpdb->get_results($q, ARRAY_A);
-$results = array_column($results, 'ID');
-echo "<pre>----------------1"; print_r($results); echo "</pre>";
-//*/
