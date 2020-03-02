@@ -76,6 +76,8 @@ function getParentCatids($product_id){
 $getParentCatids = getParentCatids(get_the_ID());
 
 
+
+
 /*
 * Wp tab menu
 */
@@ -762,6 +764,25 @@ add_action( 'wp_enqueue_scripts', 'salient_child_enqueue_styles');
 
 add_action( 'admin_enqueue_scripts', 'salient_child_enqueue_styles');
 
+
+Step 1:
+function sp_carousel_settings( $autoplay ) {
+
+    wp_deregister_script( 'sp_main_js', 'you/file/path/here', array( 'jquery' ), '1.0', true);
+
+}
+add_action( 'wp_enqueue_scripts', 'sp_carousel_settings' );
+
+
+Step 2:
+add_shortcode( 'sp-slider', 'sp_slider_get_posts');
+function sp_slider_get_posts( $atts ) {
+  .....
+  $carousel_settings = array( 'autoplay' => $autoplay);
+  wp_localize_script( 'sp_main_js', 'carousel_settings', $carousel_settings );
+  ......
+
+}
 
 
 //Dequeue Styles
@@ -2102,7 +2123,81 @@ function chile_init_fun(){
     }
     //
 
+        
+
+
+//use shortcode [get_specific_product_shortcode id='here enter product is']
+
+
+function get_specific_product_shortcode_function($atts){
+
+  extract( shortcode_atts(
+        array(
+           'id' => '',
+            ), $atts )
+    );
+
+  ob_start();
+
+    $args = array(
+        'posts_per_page'   => 1,
+        'post__in'         =>array($id),
+        'orderby'          => 'date',
+        'order'            => 'DESC',
+        'post_type'        => 'product',
+        'post_status'      => 'publish',
+    );
+
+    $query = new WP_Query( $args );
+
+    $count = $query->found_posts;
+    
+    if($query->have_posts()){
+
+        while( $query->have_posts() ) {  $query->the_post();
+
+                $post_thumbnail_id = get_post_thumbnail_id();
+
+                 $product = wc_get_product(get_the_ID());
+
+                if (!empty($post_thumbnail_id)) {
+                    $image_size = 'medium'; // (thumbnail, medium, large, full or custom size)
+                    $img_url_arr = wp_get_attachment_image_src( $post_thumbnail_id, $image_size );
+                    $img_url = $img_url_arr[0];
+
+                }else{
+                  //placeholder image
+                    $img_url = home_url().'/wp-content/uploads/woocommerce-placeholder.png';
+
+
+                }
+
+            ?>
+            <div>
+                <a href="<?php echo get_permalink();?>">
+                    <img src="<?php echo $img_url?>" style="width: 150px;">
+                </a>
+
+                <div>Price: <?php echo $product->get_price_html(); ?></div>
                 
+                <div><?php echo get_the_title();?></div>
+            </div>
+            <?php
+        }
+
+        wp_reset_postdata();
+
+    }else{
+        echo 'no post'; echo "<br>";
+    }
+
+
+
+return ob_get_clean();
+}
+add_shortcode('get_specific_product_shortcode', 'get_specific_product_shortcode_function');
+
+        
 
 /* 
 * End:Post argument
@@ -3218,7 +3313,7 @@ else{
 * Wp selct query
 */ 
 
-"SELECT ID FROM wp_posts WHERE ID IN () AND post_status='publish'";
+"SELECT ID FROM wp_posts WHERE ID IN () AND post_type='product' AND post_status='publish'";
 
 "SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN ()";
 
@@ -3229,6 +3324,37 @@ else{
 * Wp selct query
 */ 
 
+
+  //
+        "
+        SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_id FROM wp_terms WHERE name LIKE 'LB7' AND term_id IN ())) AND post_type='product' AND post_status='publish'
+
+
+        SELECT term_id FROM wp_term_taxonomy WHERE taxonomy LIKE 'pa_%'
+
+         
+        ";
+
+        //
+
+
+
+
+
+
+
+
+
+
+ $get_posts_bytag_id = $wpdb->get_results("SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_taxonomy_id FROM wp_term_taxonomy WHERE taxonomy = 'product_tag' AND term_id IN (SELECT term_id FROM wp_terms WHERE term_id = '".$fltags."')  )) AND post_type='product' AND post_status='publish'");
+            $get_posts_bytag_id = array_column($get_posts_bytag_id, 'ID');
+            //echo "<pre>tag"; print_r($get_posts_bytag_id); echo "</pre>";
+
+            $get_posts_byattr_id = $wpdb->get_results("SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_taxonomy_id FROM wp_term_taxonomy WHERE taxonomy = 'pa_%' AND term_id IN (SELECT term_id FROM wp_terms WHERE term_id = '".$fltags."')  )) AND post_type='product' AND post_status='publish'");
+            $get_posts_byattr_id = array_column($get_posts_byattr_id, 'ID');
+            //echo "<pre>attr"; print_r($get_posts_byattr_id); echo "</pre>";
+
+        
 ?>
 
 
@@ -3277,3 +3403,214 @@ user and usermeta
 wp_woocommerce_order_items and wp_woocommerce_order_itemsmeta
 
 coments and comentmeta
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function custom_advance_search_form_function(){
+
+ob_start();
+
+global $wpdb;
+
+//Get All tags
+$get_term_tags = $wpdb->get_results("SELECT * FROM wp_terms WHERE term_id IN (SELECT term_id FROM wp_term_taxonomy WHERE taxonomy = 'product_tag')");
+//Get All tags
+
+
+//Get All attributes
+$all_attr_term_ids = array();
+$get_term_attr = $wpdb->get_results("SELECT * FROM wp_terms WHERE term_id IN (SELECT term_id FROM wp_term_taxonomy WHERE taxonomy LIKE 'pa_%' AND taxonomy NOT IN('pa_manufacturer-part-number', 'pa_interchange-part-number', 'pa_gtin') )");
+
+//$get_term_attr = $wpdb->get_results("SELECT * FROM wp_terms WHERE term_id IN (SELECT term_id FROM wp_term_taxonomy WHERE taxonomy IN ('pa_brand', 'pa_color', 'pa_engine-displacement') )");
+
+
+//Get All attributes
+
+
+?>
+
+<form method="get" role="search" action="<?php echo home_url();?>">
+
+    <div>
+        <label>Attributes</label>
+        <select name="flattr" id="flattr">
+            <option value="">select</option>
+            <?php foreach ($get_term_attr as $data) { ?>
+                 <option value="<?php echo $data->term_id;?>"><?php echo $data->name;?></option>
+            <?php } ?>
+        </select>
+    </div>
+
+
+    <div>
+        <label>Tag</label>
+        <select name="fltags" id="fltags">
+            <option value="">select</option>
+            <?php foreach ($get_term_tags as $data) { ?>
+                 <option value="<?php echo $data->term_id;?>"><?php echo $data->name;?></option>
+            <?php } ?>
+        </select>
+    </div>
+
+    <input type="hidden" name="custom_advance_search_form" value="1">
+    <input type="hidden" name="post_type" value="product">
+    <input type="hidden" class="fl-search-input form-control" name="s" value="Search" onfocus="if (this.value == 'Search') { this.value = ''; }" onblur="if (this.value == ''){ this.value='Search';}">
+
+    <br>
+
+    <div>
+        <button>Submit</button>
+    </div>
+    
+</form>
+
+<script type="text/javascript">
+    jQuery(function () {
+        jQuery("#fltags").select2({
+            placeholder: "Select tags",
+            allowClear: true,
+            theme: 'bootstrap4',
+            width: '20%'
+        });
+
+        jQuery("#flattr").select2({
+            placeholder: "Select atributes",
+            allowClear: true,
+            theme: 'bootstrap4',
+            width: '20%'
+        });
+    });
+</script>
+
+<?php
+return ob_get_clean();
+}
+add_shortcode('custom_advance_search_form', 'custom_advance_search_form_function');
+
+
+function custom_advance_search_form_pre_get_posts_fun( $query ) {
+
+    global $wpdb;
+
+    if ( ! is_admin() && $query->is_main_query() && isset($_GET['s']) && $_GET['custom_advance_search_form']=='1' && isset($_GET['post_type']) && $_GET['post_type']=='product' && !isset($_GET['ymm_search'])) {
+
+
+        $fltags = $_GET['fltags'];
+        $flattr = $_GET['flattr'];
+
+        //echo "fltags: ".$fltags; echo "<br>";
+        //echo "flattr: ".$flattr; echo "<br>";
+        //$t_ids = implode(', ', array($fltags,$flattr));
+
+        if (!empty($fltags) && !empty($flattr)) {
+
+            $get_posts_bytag_id = $wpdb->get_results("SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_id FROM wp_terms WHERE term_id = '".$fltags."'    )) AND post_status='publish'");
+            $get_posts_bytag_id = array_column($get_posts_bytag_id, 'ID');
+            //echo "<pre>tag"; print_r($get_posts_bytag_id); echo "</pre>";
+
+            $get_posts_byattr_id = $wpdb->get_results("SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_id FROM wp_terms WHERE term_id = '".$flattr."'    )) AND post_status='publish'");
+            $get_posts_byattr_id = array_column($get_posts_byattr_id, 'ID');
+            //echo "<pre>attr"; print_r($get_posts_byattr_id); echo "</pre>";
+
+            $get_posts = array_intersect($get_posts_bytag_id, $get_posts_byattr_id);
+
+        }else{
+
+            if (!empty($fltags)) {
+
+                $get_posts_bytag_id = $wpdb->get_results("SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_id FROM wp_terms WHERE term_id = '".$fltags."'    )) AND post_status='publish'");
+                $get_posts_bytag_id = array_column($get_posts_bytag_id, 'ID');
+                $get_posts = $get_posts_bytag_id;
+                //echo "<pre>1tag"; print_r($get_posts); echo "</pre>";
+
+            }
+
+
+            if ( !empty($flattr)) {
+                $get_posts_byattr_id = $wpdb->get_results("SELECT ID FROM wp_posts WHERE ID IN (SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN (SELECT term_id FROM wp_terms WHERE term_id = '".$flattr."'    )) AND post_status='publish'");
+                $get_posts_byattr_id = array_column($get_posts_byattr_id, 'ID');
+                $get_posts = $get_posts_byattr_id;
+                //echo "<pre>1attr"; print_r($get_posts); echo "</pre>";
+            }
+
+
+        }
+
+        $attr_p_ids = array_unique($get_posts);
+
+        //echo "<pre>final"; print_r($attr_p_ids); echo "</pre>";
+
+        $count = sizeof($attr_p_ids);
+
+        if ($count == '0') { 
+
+            $query->set('post_type', 'pp');
+
+        }else{ 
+
+            $query->set('s', '');
+
+            if(sizeof($attr_p_ids) == 1){
+                $query->set('p',current($attr_p_ids));
+            }else{
+                $query->set('post__in',$attr_p_ids);
+            }
+
+        }
+
+        //die('@@');
+
+    }
+
+
+
+}
+
+add_action( 'pre_get_posts', 'custom_advance_search_form_pre_get_posts_fun' );
+
+
+
+
+//
+
+//This mail is to inform you of your unplanned absence from the office in highly disappointing at the time of project delivery. You are well aware that as per the company rules you are required to obtain prior permission from the HR Department before proceeding for any sort of planned leave. However, in spite of knowing the above fact, you have intentionally remained absent from your duty today. We want justification for your unplanned leave first in the morning when you come.
+
+//And this mail is our last written warning to you if you are found repeating these types of mistakes, then, in that case, strict action will be taken against you.
+
+//
+
+
+
+
+
+
+
+
+
+
+
+Yesterday I am attending my system wedding that way I am not spleeping whole and manging work like catering , guest ext
+
+Yesterday I can't come to the office because I m busy with my sister's marriage and managing the event itself and also I am not sleeping the whole night that why I do not come to the office.
+
+
+Yesterday I was busy with my sister wedding and managing the event itself and also I am not sleeping the whole night that's why I could not come to the office
