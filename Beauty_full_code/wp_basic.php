@@ -322,7 +322,7 @@ function segnalazioni_search_where( $where ) {
 */
 add_filter( 'wp_nav_menu_items', 'wti_loginout_menu_link', 10, 2 );
 function wti_loginout_menu_link( $items, $args ) {
-   if ($args->menu == 'top-links') {
+   if ($args->menu->term_id == 53) {
       if (is_user_logged_in()) {
          $items .= '<li class="right"><a href="'. get_permalink( get_option('woocommerce_myaccount_page_id') ) .'">'. __("My Account") .'</a></li>';
       } else {
@@ -334,7 +334,7 @@ function wti_loginout_menu_link( $items, $args ) {
 
 add_filter( 'wp_nav_menu_items', 'wti_loginout_menu_link', 10, 2 );
 function wti_loginout_menu_link( $items, $args ) {
-   if ($args->menu == 'top-links') {
+   if ($args->menu->term_id == 53) {
       if (is_user_logged_in()) {
          $items .= '<li class="right"><a href="'. wp_logout_url() .'">'. __("Log Out") .'</a></li>';
       } else {
@@ -703,7 +703,6 @@ echo "</pre>";
 /*
 * get theme mode
 */
-
 
 /*
 *  Start:wp_enqueue_scripts action
@@ -1526,6 +1525,15 @@ add_shortcode('acf_gallery_shortcode', 'acf_gallery_function');
 
 
 
+function my_awesome_shortcode_func( $atts, $content = null ) {
+   return '<awesomeness>' . $content . '</awesomeness>';
+}
+
+add_shortcode( 'my_awesome_shortcode', 'my_awesome_shortcode_func' );
+
+
+
+
 
 /*
 * Start:after_setup_theme
@@ -1947,9 +1955,6 @@ $args = array( //77392
 
 
 
-
-
-
 /*$args = array(
     'posts_per_page'   => 10,
     'orderby'          => 'date',
@@ -1964,7 +1969,6 @@ $args = array( //77392
         )
     )
 );
-
 
 $query = new WP_Query( $args );
 
@@ -2069,7 +2073,7 @@ function chile_init_fun(){
     $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
     $args = array(
         'posts_per_page'   => 10,
-        'paged'         =>$paged,
+        'paged'         => $paged,
         'post__in'         =>array($postID),
         'orderby'          => 'date',
         'order'            => 'DESC',
@@ -3267,6 +3271,27 @@ function cusrom_send_mailer(){
 
 
 
+$to = $user->user_email;
+$subject = $_POST['subject'];
+$body = $_POST['description'];
+$file = $_FILES["attachment_news"]["tmp_name"];
+$content = parse_url($file);
+$files = $content[path];
+$headers = array('Content-Type: text/html; charset=UTF-8');
+wp_mail( $to, $subject, $body, $headers, $files );
+
+<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>"  enctype="multipart/form-data">
+          <input type="hidden" name="action" value="newsletter_form">
+          <label for="subject">Subject:</label>
+          <input type="text" name="subject" id="subject">
+          <label for="description">Description:</label>
+          <input type="text" name="description" id="description">
+          <label for="attachment_news">Upload file:</label>
+          <input type="file" name="attachment_news" id="attachment_news">
+          <input type="submit" name="submit" value="Submit">
+        </form>
+
+
 $to = "gaurav.clagtech@gmail.com";
 $subject = "Test";
 $txt = "Testing! cron.php  55";
@@ -3307,6 +3332,72 @@ else{
 
 
 
+
+
+//search
+function woo_product_searcg_shortcode_function(){
+ob_start();
+    ?>
+    <form role="search" method="get" class="woocommerce-product-search" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+        <label class="screen-reader-text" for="woocommerce-product-search-field-<?php echo isset( $index ) ? absint( $index ) : 0; ?>"><?php esc_html_e( 'Search for:', 'woocommerce' ); ?></label>
+        <input type="search" id="woocommerce-product-search-field-<?php echo isset( $index ) ? absint( $index ) : 0; ?>" class="search-field" placeholder="<?php echo esc_attr__( 'Search products&hellip;', 'woocommerce' ); ?>" value="<?php echo get_search_query(); ?>" name="s" />
+        <button type="submit" value="<?php echo esc_attr_x( 'Search', 'submit button', 'woocommerce' ); ?>"><?php echo esc_html_x( 'Search', 'submit button', 'woocommerce' ); ?></button>
+        <input type="hidden" name="post_type" value="product" />
+        <input type="hidden" name="custom_search" value="custom_search" />
+    </form>
+    <?php
+return ob_get_clean();
+}
+add_shortcode('woo_product_searcg_shortcode', 'woo_product_searcg_shortcode_function');
+
+
+
+function custom_advance_search2( $query ) {
+    if ( ! is_admin() && $query->is_main_query() && isset($_GET['s']) && $_GET['custom_search']=='custom_search' && isset($_GET['post_type']) && $_GET['post_type']=='product') {
+      
+        global $wpdb;
+        
+        $get_s = $_GET['s'];
+
+        $attr_p_ids = array();
+
+        $get_product_ids = array();
+
+        $get_product_results = $wpdb->get_results("SELECT ID FROM wp_posts WHERE post_title='".$get_s."' AND ( post_type='product' AND post_status='publish' )");
+            if(!empty($get_product_results)){
+                $get_product_ids[] = array_column($get_product_results, 'ID');
+            }
+
+
+        echo '<pre>'; print_r($get_product_ids); echo "</pre>";
+
+
+        $attr_p_ids = array_unique($get_product_ids);
+
+        $count = sizeof($attr_p_ids);
+
+        if ($count == '0') { 
+
+            $query->set('post_type', 'pp');
+
+        }else{ 
+
+            $query->set('s', '');
+
+            if(sizeof($attr_p_ids) == 1){
+                $query->set('p',current($attr_p_ids));
+            }else{
+                $query->set('post__in',$attr_p_ids);
+            }
+
+        }
+
+        return $query;
+}
+
+add_action( 'pre_get_posts', 'custom_advance_search2' );
+
+//search
 
 
 /*
@@ -3590,6 +3681,40 @@ add_action( 'pre_get_posts', 'custom_advance_search_form_pre_get_posts_fun' );
 
 
 
+//wp query 
+
+//widgets
+
+//metabox
+
+//enqueuescript
+
+//hooks add_action() add_filter()
+
+//shortcod()
+
+//ajax 
+
+//theme herarchy
+
+//wpdb
+
+//globle variable $post, $wp_query ,  $product, , $woocommerce, $cart
+
+//js_composer addon
+
+//conatc form 7 addon
+
+//woocommerce addon
+
+//url and path
+
+
+
+
+
+
+
 //
 
 //This mail is to inform you of your unplanned absence from the office in highly disappointing at the time of project delivery. You are well aware that as per the company rules you are required to obtain prior permission from the HR Department before proceeding for any sort of planned leave. However, in spite of knowing the above fact, you have intentionally remained absent from your duty today. We want justification for your unplanned leave first in the morning when you come.
@@ -3600,17 +3725,39 @@ add_action( 'pre_get_posts', 'custom_advance_search_form_pre_get_posts_fun' );
 
 
 
+<li class="nav-item dropdown">
+            <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Dropdown</a>
+            <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+              <li><a href="#" class="dropdown-item">Some action </a></li>
+              <li><a href="#" class="dropdown-item">Some other action</a></li>
+
+              <li class="dropdown-divider"></li>
+
+              <!-- Level two dropdown-->
+              <li class="dropdown-submenu dropdown-hover">
+                <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Hover for action</a>
+                <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                  <li>
+                    <a tabindex="-1" href="#" class="dropdown-item">level 2</a>
+                  </li>
+
+                  <!-- Level three dropdown-->
+                  <li class="dropdown-submenu">
+                    <a id="dropdownSubMenu3" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">level 2</a>
+                    <ul aria-labelledby="dropdownSubMenu3" class="dropdown-menu border-0 shadow">
+                      <li><a href="#" class="dropdown-item">3rd level</a></li>
+                      <li><a href="#" class="dropdown-item">3rd level</a></li>
+                    </ul>
+                  </li>
+                  <!-- End Level three -->
+
+                  <li><a href="#" class="dropdown-item">level 2</a></li>
+                  <li><a href="#" class="dropdown-item">level 2</a></li>
+                </ul>
+              </li>
+              <!-- End Level two -->
 
 
-
-
-
-
-
-
-Yesterday I am attending my system wedding that way I am not spleeping whole and manging work like catering , guest ext
-
-Yesterday I can't come to the office because I m busy with my sister's marriage and managing the event itself and also I am not sleeping the whole night that why I do not come to the office.
-
-
-Yesterday I was busy with my sister wedding and managing the event itself and also I am not sleeping the whole night that's why I could not come to the office
+              
+            </ul>
+          </li>
